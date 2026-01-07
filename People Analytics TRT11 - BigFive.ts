@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   CheckCircle, 
   AlertTriangle, 
@@ -16,8 +16,11 @@ import {
   Upload,
   FileText,
   Download,
-  Printer,
-  Loader2
+  Loader2,
+  CheckSquare,
+  X,
+  Check,
+  Minus
 } from 'lucide-react';
 
 // --- CONFIGURAÇÃO E CONSTANTES ---
@@ -25,176 +28,113 @@ import {
 // Cores e Identidade dos 5 Fatores (OCEAN)
 const TRAITS_CONFIG = {
   abertura: { 
-    label: "Abertura à Experiência", 
+    label: "Abertura (Intelecto)", 
     color: "text-orange-600", 
     bg: "bg-orange-500", 
     lightBg: "bg-orange-50",
-    desc: "Imaginação, curiosidade, inovação e apreço pela arte."
+    border: "border-orange-200",
+    desc: "Criatividade, curiosidade intelectual e apreço pelo novo."
   },
   conscienciosidade: { 
-    label: "Conscienciosidade", 
+    label: "Conscienciosidade (Foco)", 
     color: "text-blue-600", 
     bg: "bg-blue-600", 
     lightBg: "bg-blue-50",
-    desc: "Organização, disciplina, foco em metas e responsabilidade."
+    border: "border-blue-200",
+    desc: "Disciplina, eficiência, ordem e foco em resultados."
   },
   extroversao: { 
     label: "Extroversão", 
     color: "text-yellow-600", 
     bg: "bg-yellow-500", 
     lightBg: "bg-yellow-50",
-    desc: "Energia social, assertividade e busca por estímulos."
+    border: "border-yellow-200",
+    desc: "Entusiasmo, assertividade e busca por interação social."
   },
   amabilidade: { 
-    label: "Amabilidade", 
+    label: "Amabilidade (Cooperação)", 
     color: "text-green-600", 
     bg: "bg-green-500", 
     lightBg: "bg-green-50",
-    desc: "Cooperação, empatia, confiança e altruísmo."
+    border: "border-green-200",
+    desc: "Empatia, confiança nos outros e tendência a ajudar."
   },
   estabilidade: { 
     label: "Estabilidade Emocional", 
     color: "text-purple-600", 
     bg: "bg-purple-600", 
     lightBg: "bg-purple-50",
-    desc: "Resiliência, controle de impulsos e calma sob pressão."
+    border: "border-purple-200",
+    desc: "Calma, segurança e resistência ao estresse."
   }
 };
 
-// --- BASE DE PERGUNTAS (IPIP-NEO-120 - VERSÃO PT-BR ADAPTADA) ---
-const BIG_FIVE_120 = [
-  // ABERTURA (O)
-  { id: 1, text: "Tenho uma imaginação vívida.", trait: 'abertura', key: 1 },
-  { id: 2, text: "Não estou interessado em ideias abstratas.", trait: 'abertura', key: -1 },
-  { id: 3, text: "Tenho dificuldade em compreender ideias abstratas.", trait: 'abertura', key: -1 },
-  { id: 4, text: "Tenho excelentes ideias.", trait: 'abertura', key: 1 },
-  { id: 5, text: "Não tenho uma boa imaginação.", trait: 'abertura', key: -1 },
-  { id: 6, text: "Gosto de refletir sobre teorias.", trait: 'abertura', key: 1 },
-  { id: 7, text: "Evito discussões filosóficas.", trait: 'abertura', key: -1 },
-  { id: 8, text: "Gosto de resolver problemas complexos.", trait: 'abertura', key: 1 },
-  { id: 9, text: "Tenho interesse por arte e cultura.", trait: 'abertura', key: 1 },
-  { id: 10, text: "Não gosto de ir a museus de arte.", trait: 'abertura', key: -1 },
-  { id: 11, text: "Sinto emoções profundas ao ouvir música.", trait: 'abertura', key: 1 },
-  { id: 12, text: "Gosto de experimentar coisas novas.", trait: 'abertura', key: 1 },
-  { id: 13, text: "Prefiro fazer as coisas do jeito tradicional.", trait: 'abertura', key: -1 },
-  { id: 14, text: "Gosto de variedade e mudança.", trait: 'abertura', key: 1 },
-  { id: 15, text: "Acredito na importância da arte.", trait: 'abertura', key: 1 },
-  { id: 16, text: "Tendo a votar em candidatos liberais/progressistas.", trait: 'abertura', key: 1 },
-  { id: 17, text: "Não gosto de poesia.", trait: 'abertura', key: -1 },
-  { id: 18, text: "Raramente noto minhas reações emocionais.", trait: 'abertura', key: -1 },
-  { id: 19, text: "Gosto de aprender sobre a história de outros países.", trait: 'abertura', key: 1 },
-  { id: 20, text: "Tenho pouco interesse em especulações sobre o universo.", trait: 'abertura', key: -1 },
-  { id: 21, text: "Sou muito curioso(a).", trait: 'abertura', key: 1 },
-  { id: 22, text: "Gosto de um trabalho que exija criatividade.", trait: 'abertura', key: 1 },
-  { id: 23, text: "Não gosto de perder tempo sonhando acordado.", trait: 'abertura', key: -1 },
-  { id: 24, text: "Gosto de me perder em pensamentos.", trait: 'abertura', key: 1 },
+// --- BASE DE ADJETIVOS (BIG FIVE MARKERS - 50 ITENS) ---
+// Adaptado de Goldberg (1992), Saucier (1994) e Ledesma et al. (2011)
+// key: 1 (Positivo), -1 (Invertido)
+const BIG_FIVE_ADJECTIVES = [
+  // ABERTURA
+  { id: 1, text: "Criativo(a)", trait: 'abertura', key: 1 },
+  { id: 2, text: "Imaginativo(a)", trait: 'abertura', key: 1 },
+  { id: 3, text: "Inovador(a)", trait: 'abertura', key: 1 },
+  { id: 4, text: "Intelectual", trait: 'abertura', key: 1 },
+  { id: 5, text: "Artístico(a)", trait: 'abertura', key: 1 },
+  { id: 6, text: "Curioso(a)", trait: 'abertura', key: 1 },
+  { id: 7, text: "Filosófico(a)", trait: 'abertura', key: 1 },
+  { id: 8, text: "Convencional", trait: 'abertura', key: -1 },
+  { id: 9, text: "Rotineiro(a)", trait: 'abertura', key: -1 },
+  { id: 10, text: "Conservador(a)", trait: 'abertura', key: -1 },
 
-  // CONSCIENCIOSIDADE (C)
-  { id: 25, text: "Estou sempre preparado(a).", trait: 'conscienciosidade', key: 1 },
-  { id: 26, text: "Deixo meus pertences espalhados.", trait: 'conscienciosidade', key: -1 },
-  { id: 27, text: "Presto atenção aos detalhes.", trait: 'conscienciosidade', key: 1 },
-  { id: 28, text: "Faço as coisas de qualquer jeito.", trait: 'conscienciosidade', key: -1 },
-  { id: 29, text: "Consigo realizar minhas tarefas logo.", trait: 'conscienciosidade', key: 1 },
-  { id: 30, text: "Frequentemente esqueço de colocar as coisas no lugar.", trait: 'conscienciosidade', key: -1 },
-  { id: 31, text: "Gosto de ordem.", trait: 'conscienciosidade', key: 1 },
-  { id: 32, text: "Fujo das minhas responsabilidades.", trait: 'conscienciosidade', key: -1 },
-  { id: 33, text: "Sigo um cronograma.", trait: 'conscienciosidade', key: 1 },
-  { id: 34, text: "Sou exigente no meu trabalho.", trait: 'conscienciosidade', key: 1 },
-  { id: 35, text: "Tenho dificuldade em começar a trabalhar.", trait: 'conscienciosidade', key: -1 },
-  { id: 36, text: "Sempre termino o que começo.", trait: 'conscienciosidade', key: 1 },
-  { id: 37, text: "Faço planos e os sigo.", trait: 'conscienciosidade', key: 1 },
-  { id: 38, text: "Perco tempo com coisas triviais.", trait: 'conscienciosidade', key: -1 },
-  { id: 39, text: "Não sou muito confiável.", trait: 'conscienciosidade', key: -1 },
-  { id: 40, text: "Sou eficiente.", trait: 'conscienciosidade', key: 1 },
-  { id: 41, text: "Mantenho minhas promessas.", trait: 'conscienciosidade', key: 1 },
-  { id: 42, text: "Às vezes não me comporto como deveria.", trait: 'conscienciosidade', key: -1 },
-  { id: 43, text: "Trabalho duro.", trait: 'conscienciosidade', key: 1 },
-  { id: 44, text: "Faço mais do que é esperado de mim.", trait: 'conscienciosidade', key: 1 },
-  { id: 45, text: "Tomo decisões precipitadas.", trait: 'conscienciosidade', key: -1 },
-  { id: 46, text: "Lido com as tarefas de forma metódica.", trait: 'conscienciosidade', key: 1 },
-  { id: 47, text: "Evito erros.", trait: 'conscienciosidade', key: 1 },
-  { id: 48, text: "Prefiro agir logo a planejar.", trait: 'conscienciosidade', key: -1 },
+  // CONSCIENCIOSIDADE
+  { id: 11, text: "Organizado(a)", trait: 'conscienciosidade', key: 1 },
+  { id: 12, text: "Eficiente", trait: 'conscienciosidade', key: 1 },
+  { id: 13, text: "Sistemático(a)", trait: 'conscienciosidade', key: 1 },
+  { id: 14, text: "Prático(a)", trait: 'conscienciosidade', key: 1 },
+  { id: 15, text: "Cuidadoso(a)", trait: 'conscienciosidade', key: 1 },
+  { id: 16, text: "Disciplinado(a)", trait: 'conscienciosidade', key: 1 },
+  { id: 17, text: "Pontual", trait: 'conscienciosidade', key: 1 },
+  { id: 18, text: "Desorganizado(a)", trait: 'conscienciosidade', key: -1 },
+  { id: 19, text: "Negligente", trait: 'conscienciosidade', key: -1 },
+  { id: 20, text: "Indisciplinado(a)", trait: 'conscienciosidade', key: -1 },
 
-  // EXTROVERSÃO (E)
-  { id: 49, text: "Sou a alma da festa.", trait: 'extroversao', key: 1 },
-  { id: 50, text: "Não falo muito.", trait: 'extroversao', key: -1 },
-  { id: 51, text: "Sinto-me confortável perto das pessoas.", trait: 'extroversao', key: 1 },
-  { id: 52, text: "Mantenho-me em segundo plano.", trait: 'extroversao', key: -1 },
-  { id: 53, text: "Inicio conversas.", trait: 'extroversao', key: 1 },
-  { id: 54, text: "Não gosto de chamar a atenção.", trait: 'extroversao', key: -1 },
-  { id: 55, text: "Converso com muitas pessoas diferentes em festas.", trait: 'extroversao', key: 1 },
-  { id: 56, text: "Não gosto de ambientes barulhentos.", trait: 'extroversao', key: -1 },
-  { id: 57, text: "Não me importo de ser o centro das atenções.", trait: 'extroversao', key: 1 },
-  { id: 58, text: "Sou quieto(a) perto de estranhos.", trait: 'extroversao', key: -1 },
-  { id: 59, text: "Sei como cativar as pessoas.", trait: 'extroversao', key: 1 },
-  { id: 60, text: "Tenho pouco a dizer.", trait: 'extroversao', key: -1 },
-  { id: 61, text: "Faço amigos com facilidade.", trait: 'extroversao', key: 1 },
-  { id: 62, text: "Mantenho as pessoas à distância.", trait: 'extroversao', key: -1 },
-  { id: 63, text: "Sou uma pessoa alegre.", trait: 'extroversao', key: 1 },
-  { id: 64, text: "Raramente me divirto muito.", trait: 'extroversao', key: -1 },
-  { id: 65, text: "Tenho uma risada contagiante.", trait: 'extroversao', key: 1 },
-  { id: 66, text: "Busco aventura e emoção.", trait: 'extroversao', key: 1 },
-  { id: 67, text: "Evito situações perigosas.", trait: 'extroversao', key: -1 },
-  { id: 68, text: "Ajo de forma selvagem e maluca às vezes.", trait: 'extroversao', key: 1 },
-  { id: 69, text: "Gosto de estar ocupado(a).", trait: 'extroversao', key: 1 },
-  { id: 70, text: "Reajo devagar às coisas.", trait: 'extroversao', key: -1 },
-  { id: 71, text: "Sou cheio(a) de energia.", trait: 'extroversao', key: 1 },
-  { id: 72, text: "Deixo que os outros liderem o caminho.", trait: 'extroversao', key: -1 },
+  // EXTROVERSÃO
+  { id: 21, text: "Comunicativo(a)", trait: 'extroversao', key: 1 },
+  { id: 22, text: "Extrovertido(a)", trait: 'extroversao', key: 1 },
+  { id: 23, text: "Energético(a)", trait: 'extroversao', key: 1 },
+  { id: 24, text: "Ousado(a)", trait: 'extroversao', key: 1 },
+  { id: 25, text: "Sociável", trait: 'extroversao', key: 1 },
+  { id: 26, text: "Assertivo(a)", trait: 'extroversao', key: 1 },
+  { id: 27, text: "Tímido(a)", trait: 'extroversao', key: -1 },
+  { id: 28, text: "Silencioso(a)", trait: 'extroversao', key: -1 },
+  { id: 29, text: "Reservado(a)", trait: 'extroversao', key: -1 },
+  { id: 30, text: "Inibido(a)", trait: 'extroversao', key: -1 },
 
-  // AMABILIDADE (A)
-  { id: 73, text: "Preocupo-me com os outros.", trait: 'amabilidade', key: 1 },
-  { id: 74, text: "Não me interesso pelos problemas alheios.", trait: 'amabilidade', key: -1 },
-  { id: 75, text: "Tenho um coração mole.", trait: 'amabilidade', key: 1 },
-  { id: 76, text: "Sinto pouca preocupação pelos outros.", trait: 'amabilidade', key: -1 },
-  { id: 77, text: "Respeito os sentimentos dos outros.", trait: 'amabilidade', key: 1 },
-  { id: 78, text: "Insulto as pessoas.", trait: 'amabilidade', key: -1 },
-  { id: 79, text: "Gosto de ajudar os outros.", trait: 'amabilidade', key: 1 },
-  { id: 80, text: "Acredito que sou melhor que os outros.", trait: 'amabilidade', key: -1 },
-  { id: 81, text: "Simpatizo com os sentimentos alheios.", trait: 'amabilidade', key: 1 },
-  { id: 82, text: "Tenho uma língua afiada.", trait: 'amabilidade', key: -1 },
-  { id: 83, text: "Faço as pessoas se sentirem à vontade.", trait: 'amabilidade', key: 1 },
-  { id: 84, text: "Busco vingança contra quem me ofende.", trait: 'amabilidade', key: -1 },
-  { id: 85, text: "Confio nas pessoas.", trait: 'amabilidade', key: 1 },
-  { id: 86, text: "Desconfio das intenções alheias.", trait: 'amabilidade', key: -1 },
-  { id: 87, text: "Acredito que os outros têm boas intenções.", trait: 'amabilidade', key: 1 },
-  { id: 88, text: "Tiro vantagem dos outros.", trait: 'amabilidade', key: -1 },
-  { id: 89, text: "Odeio discutir ou brigar.", trait: 'amabilidade', key: 1 },
-  { id: 90, text: "Contrario os outros.", trait: 'amabilidade', key: -1 },
-  { id: 91, text: "Adoro ajudar os necessitados.", trait: 'amabilidade', key: 1 },
-  { id: 92, text: "Não tenho tempo para os outros.", trait: 'amabilidade', key: -1 },
-  { id: 93, text: "Perdoo com facilidade.", trait: 'amabilidade', key: 1 },
-  { id: 94, text: "Guardo rancor.", trait: 'amabilidade', key: -1 },
-  { id: 95, text: "Vejo a mim mesmo como alguém cooperativo.", trait: 'amabilidade', key: 1 },
-  { id: 96, text: "Critico os outros.", trait: 'amabilidade', key: -1 },
+  // AMABILIDADE
+  { id: 31, text: "Simpático(a)", trait: 'amabilidade', key: 1 },
+  { id: 32, text: "Gentil", trait: 'amabilidade', key: 1 },
+  { id: 33, text: "Cooperativo(a)", trait: 'amabilidade', key: 1 },
+  { id: 34, text: "Generoso(a)", trait: 'amabilidade', key: 1 },
+  { id: 35, text: "Prestativo(a)", trait: 'amabilidade', key: 1 },
+  { id: 36, text: "Tolerante", trait: 'amabilidade', key: 1 },
+  { id: 37, text: "Frio(a)", trait: 'amabilidade', key: -1 },
+  { id: 38, text: "Rude", trait: 'amabilidade', key: -1 },
+  { id: 39, text: "Egoísta", trait: 'amabilidade', key: -1 },
+  { id: 40, text: "Exigente", trait: 'amabilidade', key: -1 },
 
   // ESTABILIDADE (Inverso de Neuroticismo)
-  { id: 97, text: "Estresso-me facilmente.", trait: 'estabilidade', key: -1 },
-  { id: 98, text: "Estou relaxado(a) na maior parte do tempo.", trait: 'estabilidade', key: 1 },
-  { id: 99, text: "Preocupo-me com as coisas.", trait: 'estabilidade', key: -1 },
-  { id: 100, text: "Raramente me sinto triste.", trait: 'estabilidade', key: 1 },
-  { id: 101, text: "Fico perturbado(a) com facilidade.", trait: 'estabilidade', key: -1 },
-  { id: 102, text: "Não me irrito facilmente.", trait: 'estabilidade', key: 1 },
-  { id: 103, text: "Mudo de humor com frequência.", trait: 'estabilidade', key: -1 },
-  { id: 104, text: "Permaneço calmo(a) sob pressão.", trait: 'estabilidade', key: 1 },
-  { id: 105, text: "Tenho oscilações de humor frequentes.", trait: 'estabilidade', key: -1 },
-  { id: 106, text: "Tenho controle sobre minhas emoções.", trait: 'estabilidade', key: 1 },
-  { id: 107, text: "Sinto-me triste muitas vezes.", trait: 'estabilidade', key: -1 },
-  { id: 108, text: "Não sou facilmente incomodado(a) pelas coisas.", trait: 'estabilidade', key: 1 },
-  { id: 109, text: "Entro em pânico facilmente.", trait: 'estabilidade', key: -1 },
-  { id: 110, text: "Sinto-me confortável comigo mesmo(a).", trait: 'estabilidade', key: 1 },
-  { id: 111, text: "Sinto-me sobrecarregado(a) pelos eventos.", trait: 'estabilidade', key: -1 },
-  { id: 112, text: "Sei lidar com problemas.", trait: 'estabilidade', key: 1 },
-  { id: 113, text: "Sinto que não sou capaz de lidar com as coisas.", trait: 'estabilidade', key: -1 },
-  { id: 114, text: "Sou uma pessoa estável emocionalmente.", trait: 'estabilidade', key: 1 },
-  { id: 115, text: "Fico irritado(a) facilmente.", trait: 'estabilidade', key: -1 },
-  { id: 116, text: "Raramente perco a compostura.", trait: 'estabilidade', key: 1 },
-  { id: 117, text: "Frequentemente me sinto para baixo (blue).", trait: 'estabilidade', key: -1 },
-  { id: 118, text: "Não me preocupo com coisas pequenas.", trait: 'estabilidade', key: 1 },
-  { id: 119, text: "Sinto-me ameaçado(a) facilmente.", trait: 'estabilidade', key: -1 },
-  { id: 120, text: "Sou difícil de ofender.", trait: 'estabilidade', key: 1 },
+  { id: 41, text: "Calmo(a)", trait: 'estabilidade', key: 1 },
+  { id: 42, text: "Relaxado(a)", trait: 'estabilidade', key: 1 },
+  { id: 43, text: "Seguro(a)", trait: 'estabilidade', key: 1 },
+  { id: 44, text: "Estável", trait: 'estabilidade', key: 1 },
+  { id: 45, text: "Equilibrado(a)", trait: 'estabilidade', key: 1 }, 
+  { id: 46, text: "Ansioso(a)", trait: 'estabilidade', key: -1 },
+  { id: 47, text: "Nervoso(a)", trait: 'estabilidade', key: -1 },
+  { id: 48, text: "Temperamental", trait: 'estabilidade', key: -1 },
+  { id: 49, text: "Inseguro(a)", trait: 'estabilidade', key: -1 },
+  { id: 50, text: "Emotivo(a)", trait: 'estabilidade', key: -1 }
 ];
 
-// --- ARQUÉTIPOS IDEAIS POR CATEGORIA (REVISADOS E EXPANDIDOS) ---
+// --- ARQUÉTIPOS IDEAIS POR CATEGORIA ---
 const ARQUETIPOS = {
   // 1. Alta Gestão e Estratégia
   LIDERANCA_ESTRATEGICA: { abertura: 85, conscienciosidade: 75, extroversao: 85, amabilidade: 60, estabilidade: 80 },
@@ -237,7 +177,7 @@ const ARQUETIPOS = {
   EDUCACAO_MEMORIA: { abertura: 85, conscienciosidade: 70, extroversao: 60, amabilidade: 80, estabilidade: 80 }
 };
 
-// --- BASE DE DADOS COMPLETA DE UNIDADES TRT11 (REMAPEADA) ---
+// --- BASE DE DADOS COMPLETA DE UNIDADES TRT11 ---
 const unidadesTRT11 = [
   // --- ALTA ADMINISTRAÇÃO ---
   { id: 'presidencia', nome: 'PRESIDÊNCIA', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.LIDERANCA_ESTRATEGICA, competencias: ['Visão Estratégica', 'Liderança', 'Articulação Política'] },
@@ -354,10 +294,6 @@ const unidadesAgrupadas = unidadesTRT11.reduce((acc, unit) => {
 }, {});
 
 export default function PeopleAnalyticsTRT11() {
-  // Step 0: Selection Mode (New or Upload)
-  // Step 1: Quiz
-  // Step 2: Unit Selection
-  // Step 3: Results
   const [step, setStep] = useState(0); 
   const [answers, setAnswers] = useState({});
   const [userProfile, setUserProfile] = useState(null);
@@ -371,10 +307,10 @@ export default function PeopleAnalyticsTRT11() {
   const fileInputRef = useRef(null);
   const apiKey = ""; // API Key Environment Variable
 
-  // PAGINAÇÃO
-  const QUESTIONS_PER_PAGE = 10;
-  const totalPages = Math.ceil(BIG_FIVE_120.length / QUESTIONS_PER_PAGE);
-  const currentQuestions = BIG_FIVE_120.slice(currentPage * QUESTIONS_PER_PAGE, (currentPage + 1) * QUESTIONS_PER_PAGE);
+  // PAGINAÇÃO ADJETIVOS (10 por página)
+  const ADJECTIVES_PER_PAGE = 10;
+  const totalPages = Math.ceil(BIG_FIVE_ADJECTIVES.length / ADJECTIVES_PER_PAGE);
+  const currentAdjectives = BIG_FIVE_ADJECTIVES.slice(currentPage * ADJECTIVES_PER_PAGE, (currentPage + 1) * ADJECTIVES_PER_PAGE);
 
   // --- LÓGICA DE UPLOAD (GEMINI) ---
   const handleFileChange = (event) => {
@@ -400,19 +336,8 @@ export default function PeopleAnalyticsTRT11() {
 
   const analyzeWithGemini = async (contentPart, fileName) => {
     const systemInstruction = `
-      Atue como um especialista em psicometria. Analise o documento PDF fornecido (que é um Relatório Big Five/OCEAN) e extraia os percentuais (0-100) dos 5 grandes fatores.
-      
-      Se o relatório usar termos diferentes, mapeie para:
-      - Openness/Abertura
-      - Conscientiousness/Conscienciosidade
-      - Extraversion/Extroversão
-      - Agreeableness/Amabilidade
-      - Neuroticism/Instabilidade -> Inverta para Estabilidade (100 - Neuroticismo) se necessário, ou pegue Estabilidade Emocional diretamente.
-
-      Retorne APENAS um objeto JSON válido (sem markdown):
-      { "abertura": number, "conscienciosidade": number, "extroversao": number, "amabilidade": number, "estabilidade": number }
-      
-      Se não encontrar valores numéricos exatos, estime com precisão baseando-se em gráficos ou textos (Muito Baixo=10, Baixo=30, Médio=50, Alto=70, Muito Alto=90).
+      Atue como um especialista em psicometria. Analise o documento PDF fornecido e extraia os percentuais (0-100) dos 5 grandes fatores (Big Five).
+      Retorne APENAS um objeto JSON válido: { "abertura": number, "conscienciosidade": number, "extroversao": number, "amabilidade": number, "estabilidade": number }
     `;
 
     try {
@@ -439,26 +364,33 @@ export default function PeopleAnalyticsTRT11() {
       if (!jsonText) throw new Error("A IA não retornou dados válidos.");
 
       const extractedProfile = JSON.parse(jsonText);
-      
-      // Validar dados
-      const requiredKeys = ['abertura', 'conscienciosidade', 'extroversao', 'amabilidade', 'estabilidade'];
-      const isValid = requiredKeys.every(k => typeof extractedProfile[k] === 'number');
-
-      if (!isValid) throw new Error("Dados incompletos no JSON retornado.");
-
       setUserProfile(extractedProfile);
-      setStep(2); // Pula direto para seleção de unidade
+      setStep(2); 
     } catch (error) {
       console.error(error);
-      setErrorMsg('Não foi possível interpretar o relatório PDF. Verifique se o arquivo está legível ou tente realizar o teste manual.');
+      setErrorMsg('Não foi possível interpretar o relatório PDF.');
     } finally {
       setLoading(false);
     }
   };
 
-  // --- LÓGICA DO TESTE MANUAL ---
-  const handleAnswer = (questionId, value) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  // --- LÓGICA DO TESTE DE ADJETIVOS (TRIAGEM RÁPIDA) ---
+  const handleToggleAdjective = (adjId) => {
+    setAnswers(prev => {
+      const current = prev[adjId] || 0; // 0 = Neutro/Não Marcado
+      let nextVal = 0;
+      
+      // Ciclo: Neutro (0) -> Sim (5) -> Não (1) -> Neutro (0)
+      if (current === 0) nextVal = 5;      // Me descreve
+      else if (current === 5) nextVal = 1; // Não me descreve
+      else nextVal = 0;                    // Reset/Neutro
+
+      const newAnswers = { ...prev };
+      if (nextVal === 0) delete newAnswers[adjId];
+      else newAnswers[adjId] = nextVal;
+      
+      return newAnswers;
+    });
   };
 
   const handleNextPage = () => {
@@ -466,29 +398,31 @@ export default function PeopleAnalyticsTRT11() {
       setCurrentPage(prev => prev + 1);
       window.scrollTo(0, 0);
     } else {
-      calculateBigFive();
+      calculateBigFiveAdjectives();
     }
   };
 
-  const canAdvance = currentQuestions.every(q => answers[q.id] !== undefined);
-
-  // --- CÁLCULO CIENTÍFICO DO BIG FIVE ---
-  const calculateBigFive = () => {
+  // --- CÁLCULO CIENTÍFICO (ADJECTIVE MARKERS) ---
+  const calculateBigFiveAdjectives = () => {
     setLoading(true);
     setTimeout(() => {
       let scores = { abertura: 0, conscienciosidade: 0, extroversao: 0, amabilidade: 0, estabilidade: 0 };
       let counts = { abertura: 0, conscienciosidade: 0, extroversao: 0, amabilidade: 0, estabilidade: 0 };
 
-      BIG_FIVE_120.forEach(q => {
-        let val = answers[q.id];
-        if (val === undefined) val = 3; 
-        const adjustedVal = q.key === 1 ? val : (6 - val);
-        scores[q.trait] += adjustedVal;
-        counts[q.trait] += 1;
+      BIG_FIVE_ADJECTIVES.forEach(adj => {
+        let val = answers[adj.id];
+        if (val === undefined) val = 3; // Neutro se não marcado
+        
+        // Inversão de chave
+        const adjustedVal = adj.key === 1 ? val : (6 - val);
+        
+        scores[adj.trait] += adjustedVal;
+        counts[adj.trait] += 1;
       });
 
       const finalProfile = {};
       Object.keys(scores).forEach(trait => {
+        // Normalização: (Média - 1) / 4 * 100 para percentual
         if (counts[trait] > 0) {
           const avg = scores[trait] / counts[trait];
           finalProfile[trait] = Math.round(((avg - 1) / 4) * 100);
@@ -547,7 +481,9 @@ export default function PeopleAnalyticsTRT11() {
   };
 
   const handlePrint = () => {
-    window.print();
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   return (
@@ -555,40 +491,44 @@ export default function PeopleAnalyticsTRT11() {
       {/* Styles for Printing */}
       <style>{`
         @media print {
-          @page { margin: 1cm; size: A4; }
-          body { -webkit-print-color-adjust: exact; background: white; }
-          header, .no-print { display: none !important; }
-          .print-break { page-break-before: always; }
+          @page { margin: 0.5cm; size: A4 portrait; }
+          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: white !important; color: black !important; }
+          header, footer, .no-print, button { display: none !important; }
+          main { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
+          .bg-slate-50 { background-color: #f8fafc !important; border: 1px solid #eee; }
+          .text-white { color: black !important; } 
+          .print\\:block { display: block !important; }
+          .print\\:hidden { display: none !important; }
+          .break-inside-avoid { break-inside: avoid; }
           .shadow-xl, .shadow-lg, .shadow-sm { box-shadow: none !important; border: 1px solid #ddd; }
-          .bg-slate-50 { background-color: #f8fafc !important; }
         }
       `}</style>
 
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white p-4 shadow-lg sticky top-0 z-50">
+      <header className="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white p-4 shadow-lg sticky top-0 z-50 no-print">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Scale className="w-8 h-8 text-yellow-400" />
             <div>
               <h1 className="text-xl font-bold tracking-wide">TRT11 People Analytics</h1>
-              <p className="text-xs text-blue-200">Avaliação de Fit Cultural - Metodologia IPIP-NEO-120</p>
+              <p className="text-xs text-blue-200">Fit Cultural & Técnico (Adjective Checklist)</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs font-mono bg-white/10 px-3 py-1 rounded border border-white/20">
             <BrainCircuit className="w-3 h-3 text-yellow-300" />
-            <span>AI Powered v2.1</span>
+            <span>AI Powered v2.2</span>
           </div>
         </div>
       </header>
 
       <main className="max-w-6xl mx-auto p-6">
         
-        {/* Progress Stepper (Only show if Step > 0) */}
+        {/* Progress Stepper */}
         {step > 0 && (
           <div className="flex items-center justify-center mb-10 text-sm no-print">
             <div className={`flex items-center ${step >= 1 ? 'text-indigo-700 font-bold' : 'text-slate-400'}`}>
               <span className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 border-2 transition-colors ${step >= 1 ? 'bg-indigo-100 border-indigo-600' : 'border-slate-300'}`}>1</span>
-              Mapeamento
+              Checklist
             </div>
             <div className="w-16 h-1 bg-slate-200 mx-2"></div>
             <div className={`flex items-center ${step >= 2 ? 'text-indigo-700 font-bold' : 'text-slate-400'}`}>
@@ -607,34 +547,32 @@ export default function PeopleAnalyticsTRT11() {
         {step === 0 && (
           <div className="max-w-4xl mx-auto animate-fade-in-up py-10">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-slate-800 mb-4">Bem-vindo ao Sistema de People Analytics</h2>
+              <h2 className="text-3xl font-bold text-slate-800 mb-4">Sistema de People Analytics TRT11</h2>
               <p className="text-slate-500 max-w-xl mx-auto">
-                Utilize nossa inteligência artificial para mapear seu perfil comportamental (Big Five) e encontrar a unidade do TRT11 com maior aderência cultural.
+                Mapeamento de perfil comportamental via Adjective Markers (Big Five). Escolha como deseja iniciar sua análise de aderência.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Option A: Manual Quiz */}
               <div 
                 onClick={() => setStep(1)}
                 className="bg-white p-8 rounded-2xl shadow-lg border-2 border-transparent hover:border-indigo-500 cursor-pointer transition-all group relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <FileText className="w-32 h-32 text-indigo-600" />
+                  <CheckSquare className="w-32 h-32 text-indigo-600" />
                 </div>
                 <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <BookOpen className="w-8 h-8 text-indigo-600" />
+                  <FileText className="w-8 h-8 text-indigo-600" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Realizar Teste Completo</h3>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Checklist de Adjetivos</h3>
                 <p className="text-sm text-slate-500 mb-6">
-                  Responda ao inventário IPIP-120 diretamente na plataforma. Ideal para quem ainda não possui um laudo recente.
+                  Avaliação rápida e precisa baseada em 50 adjetivos-chave (Big Five Markers).
                 </p>
                 <button className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold shadow-md group-hover:bg-indigo-700 transition-colors">
-                  Iniciar Teste Agora
+                  Iniciar Checklist
                 </button>
               </div>
 
-              {/* Option B: Upload PDF */}
               <div className="bg-white p-8 rounded-2xl shadow-lg border-2 border-transparent hover:border-purple-500 cursor-pointer transition-all group relative overflow-hidden">
                 <input 
                   type="file" 
@@ -645,7 +583,7 @@ export default function PeopleAnalyticsTRT11() {
                 />
                 <div 
                   onClick={(e) => {
-                    e.stopPropagation(); // Prevent parent click
+                    e.stopPropagation();
                     if(!loading) fileInputRef.current.click();
                   }}
                   className="h-full flex flex-col"
@@ -656,17 +594,17 @@ export default function PeopleAnalyticsTRT11() {
                   <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                     {loading ? <Loader2 className="w-8 h-8 text-purple-600 animate-spin" /> : <Sparkles className="w-8 h-8 text-purple-600" />}
                   </div>
-                  <h3 className="text-xl font-bold text-slate-800 mb-2">Upload de Resultado PDF</h3>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">Upload de Laudo (PDF)</h3>
                   <p className="text-sm text-slate-500 mb-6">
-                    Já fez o teste? Envie seu relatório PDF (Big Five/OCEAN) e nossa IA extrairá os dados automaticamente.
+                    Envie um laudo Big Five existente para que nossa IA extraia os dados e calcule o fit.
                   </p>
                   <button className="w-full py-3 bg-white border-2 border-purple-600 text-purple-700 rounded-lg font-bold group-hover:bg-purple-50 transition-colors mt-auto">
-                    {loading ? 'Processando IA...' : 'Selecionar Arquivo PDF'}
+                    {loading ? 'Lendo PDF...' : 'Enviar Arquivo'}
                   </button>
                 </div>
               </div>
             </div>
-
+            
             {errorMsg && (
               <div className="mt-8 p-4 bg-red-50 text-red-700 border border-red-200 rounded-lg flex items-center gap-3 animate-pulse">
                 <AlertTriangle className="w-5 h-5 shrink-0" />
@@ -676,70 +614,82 @@ export default function PeopleAnalyticsTRT11() {
           </div>
         )}
 
-        {/* STEP 1: IPIP-NEO-120 QUIZ */}
+        {/* STEP 1: ADJECTIVE CHECKLIST (TRIAGEM) */}
         {step === 1 && (
-          <div className="max-w-3xl mx-auto animate-fade-in-up">
+          <div className="max-w-5xl mx-auto animate-fade-in-up">
             <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden mb-6">
-              <div className="p-6 bg-indigo-50 border-b border-indigo-100">
-                <div className="flex justify-between items-center">
+              <div className="p-6 bg-indigo-50 border-b border-indigo-100 flex flex-col md:flex-row justify-between items-center sticky top-0 z-30 shadow-sm gap-4">
+                <div>
                   <h2 className="text-lg font-bold text-indigo-900 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-indigo-600" />
-                    Teste de Personalidade (IPIP-120)
+                    <CheckSquare className="w-5 h-5 text-indigo-600" />
+                    Inventário de Adjetivos (Triagem Rápida)
                   </h2>
-                  <span className="bg-indigo-200 text-indigo-800 text-xs font-bold px-2 py-1 rounded">
-                    Página {currentPage + 1} de {totalPages}
+                  <p className="text-indigo-700 text-xs mt-1">
+                    Clique 1x para <strong>"Sou Eu" (Verde)</strong>. Clique 2x para <strong>"Não Sou Eu" (Vermelho)</strong>.
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex gap-2 text-[10px] font-bold uppercase text-slate-500 bg-white px-3 py-1 rounded-lg border border-slate-200">
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 bg-green-500 rounded-full"></div> Sim</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 bg-red-500 rounded-full"></div> Não</span>
+                    <span className="flex items-center gap-1"><div className="w-2 h-2 bg-slate-200 rounded-full"></div> Neutro</span>
+                  </div>
+                  <span className="bg-white border border-indigo-200 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full">
+                    Pág {currentPage + 1} / {totalPages}
                   </span>
                 </div>
-                <p className="text-indigo-700 text-xs mt-2">
-                  Avalie o quanto cada afirmação descreve você. Seja honesto(a) para garantir a precisão do perfil.
-                </p>
               </div>
 
-              <div className="p-8 space-y-8">
-                {currentQuestions.map((q) => (
-                  <div key={q.id} className="border-b border-slate-100 pb-6 last:border-0 last:pb-0">
-                    <p className="text-slate-800 font-medium mb-3 text-sm md:text-base">
-                      {q.id}. {q.text}
-                    </p>
-                    <div className="grid grid-cols-5 gap-2">
-                      {[1, 2, 3, 4, 5].map((val) => (
-                        <button
-                          key={val}
-                          onClick={() => handleAnswer(q.id, val)}
-                          className={`
-                            flex flex-col items-center justify-center py-3 rounded-lg border text-sm transition-all
-                            ${answers[q.id] === val 
-                              ? 'bg-indigo-600 text-white border-indigo-600 shadow-md transform scale-105' 
-                              : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'}
-                          `}
-                        >
-                          <span className="font-bold text-lg">{val}</span>
-                          <span className="text-[9px] uppercase hidden sm:block mt-1">
-                            {val === 1 ? 'Discordo Totalmente' : val === 5 ? 'Concordo Totalmente' : ''}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+              <div className="p-6 md:p-10">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {currentAdjectives.map((adj) => {
+                    const status = answers[adj.id] || 0; // 0=Neutro, 5=Sim, 1=Não
+                    return (
+                      <button
+                        key={adj.id}
+                        onClick={() => handleToggleAdjective(adj.id)}
+                        className={`
+                          relative p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center justify-center min-h-[100px] group
+                          ${status === 5 
+                            ? 'bg-green-50 border-green-500 shadow-md' 
+                            : status === 1 
+                              ? 'bg-red-50 border-red-500 shadow-md' 
+                              : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-sm'}
+                        `}
+                      >
+                        <div className={`
+                          absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all
+                          ${status === 5 ? 'bg-green-500 text-white' : status === 1 ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-300'}
+                        `}>
+                          {status === 5 ? <Check className="w-3 h-3" /> : status === 1 ? <X className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+                        </div>
+                        
+                        <span className={`
+                          text-sm font-bold capitalize text-center mt-1
+                          ${status === 5 ? 'text-green-800' : status === 1 ? 'text-red-800' : 'text-slate-600'}
+                        `}>
+                          {adj.text}
+                        </span>
+                        
+                        <span className="text-[9px] uppercase font-bold tracking-wider mt-2 opacity-60">
+                          {status === 5 ? 'Me Identifica' : status === 1 ? 'Não Sou Eu' : '-'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+              <div className="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center sticky bottom-0 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                 <div className="text-xs text-slate-400">
-                  Respondido: {Object.keys(answers).length} de {BIG_FIVE_120.length}
+                  <span className="font-bold text-slate-600">{Object.keys(answers).length}</span> itens marcados
                 </div>
                 <button
                   onClick={handleNextPage}
-                  disabled={!canAdvance}
-                  className={`
-                    flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm transition-all
-                    ${canAdvance 
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md' 
-                      : 'bg-slate-200 text-slate-400 cursor-not-allowed'}
-                  `}
+                  className="flex items-center gap-2 px-8 py-3 rounded-lg font-bold text-sm transition-all shadow-md ml-auto bg-indigo-600 text-white hover:bg-indigo-700 transform hover:-translate-y-0.5"
                 >
                   {currentPage === totalPages - 1 ? (
-                    loading ? 'Calculando...' : 'Finalizar e Calcular'
+                    loading ? 'Calculando Perfil...' : 'Finalizar Análise'
                   ) : (
                     'Próxima Página'
                   )}
@@ -755,7 +705,7 @@ export default function PeopleAnalyticsTRT11() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
             {/* Left Panel: User Profile Result */}
             <div className="lg:col-span-4 space-y-4">
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sticky top-24">
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 sticky top-24 print:border-none print:shadow-none">
                 <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wide mb-6 flex items-center gap-2">
                   <UserCheck className="w-4 h-4" />
                   Seu Perfil OCEAN
@@ -763,27 +713,27 @@ export default function PeopleAnalyticsTRT11() {
                 
                 <div className="space-y-6">
                   {Object.keys(TRAITS_CONFIG).map((trait) => (
-                    <div key={trait}>
+                    <div key={trait} className="break-inside-avoid">
                       <div className="flex justify-between items-end mb-2">
-                        <span className={`text-xs font-bold uppercase ${TRAITS_CONFIG[trait].color}`}>
+                        <span className={`text-xs font-bold uppercase ${TRAITS_CONFIG[trait].color} print:text-black`}>
                           {TRAITS_CONFIG[trait].label}
                         </span>
-                        <span className="font-mono font-bold text-slate-700 text-sm">{userProfile[trait]}%</span>
+                        <span className="font-mono font-bold text-slate-700 text-sm print:text-black">{userProfile[trait]}%</span>
                       </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden print:border print:border-gray-300">
                         <div 
-                          className={`h-full rounded-full ${TRAITS_CONFIG[trait].bg}`} 
+                          className={`h-full rounded-full ${TRAITS_CONFIG[trait].bg} print:bg-black`} 
                           style={{ width: `${userProfile[trait]}%` }}
                         ></div>
                       </div>
-                      <p className="text-[10px] text-slate-400 mt-1 leading-tight">
+                      <p className="text-[10px] text-slate-400 mt-1 leading-tight print:text-gray-600">
                         {TRAITS_CONFIG[trait].desc}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-slate-100">
+                <div className="mt-8 pt-6 border-t border-slate-100 no-print">
                   <button onClick={handleRestart} className="w-full py-2.5 border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors">
                     <RotateCcw className="w-3 h-3" /> REINICIAR TESTE
                   </button>
@@ -792,7 +742,7 @@ export default function PeopleAnalyticsTRT11() {
             </div>
 
             {/* Right Panel: Unit Selection */}
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-8 print:hidden">
               <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 h-full">
                 <h2 className="text-xl font-bold mb-2 flex items-center gap-2 text-slate-800">
                   <Briefcase className="w-5 h-5 text-indigo-600" />
@@ -925,19 +875,19 @@ export default function PeopleAnalyticsTRT11() {
                 onClick={handlePrint}
                 className="text-sm bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md font-bold"
               >
-                <Download className="w-4 h-4" /> Baixar Relatório (PDF)
+                <Download className="w-4 h-4" /> Imprimir / Salvar PDF
               </button>
             </div>
 
-            <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200 print:border-0 print:shadow-none">
+            <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-slate-200 print:border-none print:shadow-none">
               {/* Score Header */}
               <div className="bg-slate-50 p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 print:bg-white print:border-b-2 print:border-slate-800">
                 <div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 print:text-black">TRT11 PEOPLE ANALYTICS</div>
                   <h2 className="text-2xl font-bold text-slate-800 mb-1">Relatório de Aderência (Fit)</h2>
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="flex items-center gap-2 text-sm text-slate-500 print:text-gray-600">
                     <span>Candidato</span>
-                    <ArrowRight className="w-4 h-4 text-slate-300" />
+                    <ArrowRight className="w-4 h-4 text-slate-300 print:text-gray-400" />
                     <span className="font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 print:border-0 print:bg-transparent print:text-black print:p-0">
                       {selectedUnit.nome}
                     </span>
@@ -946,15 +896,15 @@ export default function PeopleAnalyticsTRT11() {
                 
                 <div className="flex items-center gap-6">
                   <div className="text-right hidden md:block print:block">
-                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Aderência Global</div>
-                    <div className={`text-4xl font-black ${matchResult.score >= 75 ? 'text-green-600' : matchResult.score >= 50 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <div className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 print:text-gray-600">Aderência Global</div>
+                    <div className={`text-4xl font-black ${matchResult.score >= 75 ? 'text-green-600' : matchResult.score >= 50 ? 'text-yellow-600' : 'text-red-600'} print:text-black`}>
                       {matchResult.score}%
                     </div>
                   </div>
                   
                   {/* Score Circle */}
                   <div className={`
-                    w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg ring-4 ring-white print:text-black print:shadow-none print:ring-0
+                    w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white shadow-lg ring-4 ring-white print:text-black print:shadow-none print:ring-0 print:border print:border-black
                     ${matchResult.score >= 75 ? 'bg-gradient-to-br from-green-400 to-green-600 print:bg-none' : 
                       matchResult.score >= 50 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 print:bg-none' : 
                       'bg-gradient-to-br from-red-400 to-red-600 print:bg-none'}
@@ -967,32 +917,32 @@ export default function PeopleAnalyticsTRT11() {
               <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-12 print:block">
                 
                 {/* Visual Chart - Detailed */}
-                <div className="space-y-8 print:mb-8">
+                <div className="space-y-8 print:mb-8 break-inside-avoid">
                   <div className="flex items-center justify-between border-b pb-2">
                     <h3 className="font-bold text-slate-700 flex items-center gap-2 text-sm uppercase tracking-wide">
-                      <BarChart2 className="w-4 h-4 text-indigo-500" /> Comparativo Detalhado
+                      <BarChart2 className="w-4 h-4 text-indigo-500 print:text-black" /> Comparativo Detalhado
                     </h3>
-                    <div className="flex gap-4 text-[10px] uppercase font-bold text-slate-400">
-                      <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-800"></div> Você</span>
-                      <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-slate-200"></div> Ideal</span>
+                    <div className="flex gap-4 text-[10px] uppercase font-bold text-slate-400 print:text-gray-600">
+                      <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-800 print:bg-black"></div> Você</span>
+                      <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-slate-200 print:bg-gray-300"></div> Ideal</span>
                     </div>
                   </div>
                   
                   {Object.keys(TRAITS_CONFIG).map(trait => {
                     const diff = userProfile[trait] - selectedUnit.perfil_ideal[trait];
                     return (
-                      <div key={trait} className="relative print:mb-4">
+                      <div key={trait} className="relative print:mb-4 break-inside-avoid">
                         <div className="flex justify-between text-xs font-bold mb-2">
                           <span className={`uppercase ${TRAITS_CONFIG[trait].color} print:text-black`}>{TRAITS_CONFIG[trait].label}</span>
                           <span className="text-slate-400 print:text-black">Diff: {diff > 0 ? `+${diff}` : diff}%</span>
                         </div>
                         
                         {/* Bar Track */}
-                        <div className="h-4 bg-slate-100 rounded-full overflow-hidden relative print:border print:border-slate-300">
+                        <div className="h-4 bg-slate-100 rounded-full overflow-hidden relative print:border print:border-gray-400">
                           
                           {/* Ideal Range Marker (Soft Background) */}
                           <div 
-                            className="absolute top-0 bottom-0 bg-slate-200 opacity-50 z-0 print:bg-slate-300"
+                            className="absolute top-0 bottom-0 bg-slate-200 opacity-50 z-0 print:bg-gray-300"
                             style={{ 
                               left: '0%', 
                               width: `${selectedUnit.perfil_ideal[trait]}%` 
@@ -1001,7 +951,7 @@ export default function PeopleAnalyticsTRT11() {
                           
                           {/* Ideal Line */}
                           <div 
-                            className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10" 
+                            className="absolute top-0 bottom-0 w-0.5 bg-slate-400 z-10 print:bg-black" 
                             style={{ left: `${selectedUnit.perfil_ideal[trait]}%` }}
                           ></div>
 
@@ -1017,35 +967,35 @@ export default function PeopleAnalyticsTRT11() {
                 </div>
 
                 {/* Textual Analysis */}
-                <div className="space-y-6 print:break-before-auto">
+                <div className="space-y-6 break-inside-avoid">
                   <h3 className="font-bold text-slate-700 flex items-center gap-2 border-b pb-2 text-sm uppercase tracking-wide">
-                    <BookOpen className="w-4 h-4 text-indigo-500" /> Diagnóstico da IA
+                    <BookOpen className="w-4 h-4 text-indigo-500 print:text-black" /> Diagnóstico da IA
                   </h3>
 
                   {matchResult.details.length === 0 ? (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex gap-4 print:border-black">
-                      <CheckCircle className="w-8 h-8 text-green-600 shrink-0" />
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex gap-4 print:border-black print:bg-white">
+                      <CheckCircle className="w-8 h-8 text-green-600 shrink-0 print:text-black" />
                       <div>
-                        <h4 className="font-bold text-green-800 text-sm mb-1">Sinergia Elevada</h4>
-                        <p className="text-green-700 text-sm leading-relaxed">
+                        <h4 className="font-bold text-green-800 text-sm mb-1 print:text-black">Sinergia Elevada</h4>
+                        <p className="text-green-700 text-sm leading-relaxed print:text-black">
                           Seu perfil Big Five demonstra grande alinhamento com as expectativas comportamentais desta unidade. Os traços de personalidade identificados sugerem uma adaptação natural à cultura e aos desafios do setor.
                         </p>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-slate-50 rounded-xl p-1 print:bg-white">
-                      <ul className="divide-y divide-slate-100">
+                    <div className="bg-slate-50 rounded-xl p-1 print:bg-white print:border-0">
+                      <ul className="divide-y divide-slate-100 print:divide-gray-300">
                         {matchResult.details.map((item, idx) => (
-                          <li key={idx} className="p-4 flex gap-3 items-start">
+                          <li key={idx} className="p-4 flex gap-3 items-start break-inside-avoid">
                             {item.type === 'gap' 
-                              ? <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" /> 
-                              : <div className="w-5 h-5 bg-yellow-400 text-white rounded-full flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">!</div>
+                              ? <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5 print:text-black" /> 
+                              : <div className="w-5 h-5 bg-yellow-400 text-white rounded-full flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 print:bg-black print:text-white">!</div>
                             }
                             <div>
                               <span className={`text-xs font-bold uppercase block mb-1 ${TRAITS_CONFIG[item.trait].color} print:text-black`}>
                                 {TRAITS_CONFIG[item.trait].label}
                               </span>
-                              <span className="text-slate-600 text-sm leading-snug">{item.text}</span>
+                              <span className="text-slate-600 text-sm leading-snug print:text-black">{item.text}</span>
                             </div>
                           </li>
                         ))}
@@ -1053,13 +1003,13 @@ export default function PeopleAnalyticsTRT11() {
                     </div>
                   )}
 
-                  <div className="bg-blue-50 p-5 rounded-xl border border-blue-100 print:bg-white print:border-black">
+                  <div className="bg-blue-50 p-5 rounded-xl border border-blue-100 print:bg-white print:border-black break-inside-avoid">
                     <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-blue-600" />
-                      <h4 className="text-blue-900 font-bold text-xs uppercase">Nota Técnica</h4>
+                      <Sparkles className="w-4 h-4 text-blue-600 print:text-black" />
+                      <h4 className="text-blue-900 font-bold text-xs uppercase print:text-black">Nota Técnica</h4>
                     </div>
-                    <p className="text-blue-700 text-xs leading-relaxed text-justify">
-                      Esta análise utiliza o modelo dos Cinco Grandes Fatores (Big Five). O "Fit" não é determinístico; traços como <strong>Conscienciosidade</strong> e <strong>Abertura</strong> podem ser desenvolvidos conforme o contexto. Utilize este relatório como ferramenta de autoconhecimento e desenvolvimento profissional.
+                    <p className="text-blue-700 text-xs leading-relaxed text-justify print:text-black">
+                      Esta análise utiliza o modelo dos Cinco Grandes Fatores (Big Five) via marcadores adjetivos. O "Fit" não é determinístico; traços como <strong>Conscienciosidade</strong> e <strong>Abertura</strong> podem ser desenvolvidos conforme o contexto.
                     </p>
                   </div>
                 </div>
