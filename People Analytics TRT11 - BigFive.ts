@@ -22,12 +22,22 @@ import {
   Check,
   Minus,
   ArrowLeft,
-  GripHorizontal
+  GripHorizontal,
+  ThumbsUp,
+  ThumbsDown,
+  Info,
+  Target,
+  ShieldCheck,
+  GraduationCap,
+  Zap,
+  Lightbulb,
+  Book,
+  Printer,
+  List
 } from 'lucide-react';
 
 // --- CONFIGURAÇÃO E CONSTANTES ---
 
-// Cores e Identidade dos 5 Fatores (OCEAN)
 const TRAITS_CONFIG = {
   abertura: { 
     label: "Abertura (Intelecto)", 
@@ -71,9 +81,7 @@ const TRAITS_CONFIG = {
   }
 };
 
-// --- BASE DE ADJETIVOS (BIG FIVE MARKERS - 50 ITENS) ---
 const BIG_FIVE_ADJECTIVES = [
-  // ABERTURA
   { id: 1, text: "Criativo(a)", trait: 'abertura', key: 1 },
   { id: 2, text: "Imaginativo(a)", trait: 'abertura', key: 1 },
   { id: 3, text: "Inovador(a)", trait: 'abertura', key: 1 },
@@ -84,8 +92,6 @@ const BIG_FIVE_ADJECTIVES = [
   { id: 8, text: "Convencional", trait: 'abertura', key: -1 },
   { id: 9, text: "Rotineiro(a)", trait: 'abertura', key: -1 },
   { id: 10, text: "Conservador(a)", trait: 'abertura', key: -1 },
-
-  // CONSCIENCIOSIDADE
   { id: 11, text: "Organizado(a)", trait: 'conscienciosidade', key: 1 },
   { id: 12, text: "Eficiente", trait: 'conscienciosidade', key: 1 },
   { id: 13, text: "Sistemático(a)", trait: 'conscienciosidade', key: 1 },
@@ -96,8 +102,6 @@ const BIG_FIVE_ADJECTIVES = [
   { id: 18, text: "Desorganizado(a)", trait: 'conscienciosidade', key: -1 },
   { id: 19, text: "Negligente", trait: 'conscienciosidade', key: -1 },
   { id: 20, text: "Indisciplinado(a)", trait: 'conscienciosidade', key: -1 },
-
-  // EXTROVERSÃO
   { id: 21, text: "Comunicativo(a)", trait: 'extroversao', key: 1 },
   { id: 22, text: "Extrovertido(a)", trait: 'extroversao', key: 1 },
   { id: 23, text: "Energético(a)", trait: 'extroversao', key: 1 },
@@ -108,8 +112,6 @@ const BIG_FIVE_ADJECTIVES = [
   { id: 28, text: "Silencioso(a)", trait: 'extroversao', key: -1 },
   { id: 29, text: "Reservado(a)", trait: 'extroversao', key: -1 },
   { id: 30, text: "Inibido(a)", trait: 'extroversao', key: -1 },
-
-  // AMABILIDADE
   { id: 31, text: "Simpático(a)", trait: 'amabilidade', key: 1 },
   { id: 32, text: "Gentil", trait: 'amabilidade', key: 1 },
   { id: 33, text: "Cooperativo(a)", trait: 'amabilidade', key: 1 },
@@ -120,8 +122,6 @@ const BIG_FIVE_ADJECTIVES = [
   { id: 38, text: "Rude", trait: 'amabilidade', key: -1 },
   { id: 39, text: "Egoísta", trait: 'amabilidade', key: -1 },
   { id: 40, text: "Exigente", trait: 'amabilidade', key: -1 },
-
-  // ESTABILIDADE (Inverso de Neuroticismo)
   { id: 41, text: "Calmo(a)", trait: 'estabilidade', key: 1 },
   { id: 42, text: "Relaxado(a)", trait: 'estabilidade', key: 1 },
   { id: 43, text: "Seguro(a)", trait: 'estabilidade', key: 1 },
@@ -134,243 +134,521 @@ const BIG_FIVE_ADJECTIVES = [
   { id: 50, text: "Emotivo(a)", trait: 'estabilidade', key: -1 }
 ];
 
-// --- ARQUÉTIPOS IDEAIS POR CATEGORIA ---
+// --- ARQUÉTIPOS AVANÇADOS (Expandido para 40+ perfis) ---
+// Modelagem baseada na taxonomia de atividades do TRT11 e teoria Big Five
 const ARQUETIPOS = {
-  // ESTRATÉGIA E LIDERANÇA
-  LIDERANCA_VISIONARIA: { abertura: 95, conscienciosidade: 60, extroversao: 85, amabilidade: 70, estabilidade: 85 },
-  GESTAO_OPERACIONAL_ALTA: { abertura: 50, conscienciosidade: 95, extroversao: 75, amabilidade: 50, estabilidade: 90 },
+  // === NÍVEL 1: ESTRATÉGICO E ALTA LIDERANÇA ===
+  ESTRATEGISTA_INSTITUCIONAL: { abertura: 90, conscienciosidade: 85, extroversao: 80, amabilidade: 60, estabilidade: 95 }, // Diretores Gerais, Secretários Gerais
+  LIDER_POLITICO_ADMINISTRATIVO: { abertura: 80, conscienciosidade: 75, extroversao: 90, amabilidade: 75, estabilidade: 85 }, // Chefias de Gabinete (interface política)
+  CONSELHEIRO_GOVERNANCA: { abertura: 80, conscienciosidade: 95, extroversao: 50, amabilidade: 60, estabilidade: 90 }, // Governança, Riscos, Estratégia
 
-  // JURÍDICO
-  JURIDICO_INTELECTUAL: { abertura: 85, conscienciosidade: 80, extroversao: 30, amabilidade: 45, estabilidade: 75 },
-  JURIDICO_PROCEDIMENTAL: { abertura: 30, conscienciosidade: 95, extroversao: 45, amabilidade: 50, estabilidade: 85 },
-  JURIDICO_CONCILIADOR: { abertura: 60, conscienciosidade: 55, extroversao: 80, amabilidade: 95, estabilidade: 85 },
+  // === NÍVEL 2: GESTÃO TÁTICA E CHEFIAS ===
+  GESTOR_OPERACIONAL_JUDICIARIO: { abertura: 50, conscienciosidade: 95, extroversao: 65, amabilidade: 65, estabilidade: 85 }, // Diretores de Secretaria Vara/Turma
+  GESTOR_OPERACIONAL_ADMINISTRATIVO: { abertura: 50, conscienciosidade: 90, extroversao: 60, amabilidade: 70, estabilidade: 85 }, // Chefes de Seção Administrativa
+  GESTOR_PROJETOS_TIC: { abertura: 75, conscienciosidade: 90, extroversao: 70, amabilidade: 65, estabilidade: 85 }, // Gestão de Projetos e Contratos TI
 
-  // EXATAS E CONTROLE
-  AUDITORIA_RIGOROSA: { abertura: 30, conscienciosidade: 98, extroversao: 40, amabilidade: 25, estabilidade: 90 },
-  CALCULOS_FINANCAS: { abertura: 40, conscienciosidade: 95, extroversao: 25, amabilidade: 50, estabilidade: 80 },
+  // === NÍVEL 3: ESPECIALISTAS JURÍDICOS ===
+  JURISTA_ANALITICO_SENIOR: { abertura: 85, conscienciosidade: 90, extroversao: 30, amabilidade: 45, estabilidade: 85 }, // Jurisprudência, Precedentes, Assessoria Desembargador
+  PROCESSUALISTA_EXECUTOR: { abertura: 35, conscienciosidade: 98, extroversao: 40, amabilidade: 55, estabilidade: 80 }, // Execução, Mandados (interno), Secretaria
+  OFICIAL_DILIGENCIA_EXTERNA: { abertura: 60, conscienciosidade: 80, extroversao: 70, amabilidade: 45, estabilidade: 90 }, // Oficiais de Justiça (Rua)
+  MEDIADOR_CONCILIADOR: { abertura: 70, conscienciosidade: 60, extroversao: 75, amabilidade: 98, estabilidade: 90 }, // NUPEMEC, CEJUSC, Cooperação
 
-  // ATENDIMENTO E OPERACIONAL
-  ATENDIMENTO_EMPATICO: { abertura: 50, conscienciosidade: 60, extroversao: 90, amabilidade: 90, estabilidade: 70 },
-  LOGISTICA_DINAMICA: { abertura: 55, conscienciosidade: 80, extroversao: 75, amabilidade: 60, estabilidade: 80 },
-  SEGURANCA_VIGILANTE: { abertura: 25, conscienciosidade: 85, extroversao: 65, amabilidade: 30, estabilidade: 95 },
+  // === NÍVEL 4: CONTROLE, FINANÇAS E DADOS ===
+  AUDITOR_CONFORMIDADE_RIGOROSO: { abertura: 25, conscienciosidade: 99, extroversao: 35, amabilidade: 30, estabilidade: 90 }, // Auditoria Interna, Controle
+  ANALISTA_ORCAMENTARIO_FINANCEIRO: { abertura: 40, conscienciosidade: 98, extroversao: 35, amabilidade: 50, estabilidade: 85 }, // Orçamento, Empenho
+  CALCULISTA_JUDICIAL: { abertura: 40, conscienciosidade: 99, extroversao: 25, amabilidade: 40, estabilidade: 85 }, // Contadoria, Cálculos
+  CIENTISTA_DADOS_ESTATISTICO: { abertura: 85, conscienciosidade: 90, extroversao: 30, amabilidade: 50, estabilidade: 80 }, // Estatística, DataJud
 
-  // ADMINISTRATIVO
-  SUPORTE_ROTINA: { abertura: 25, conscienciosidade: 90, extroversao: 50, amabilidade: 75, estabilidade: 80 },
-  COMPRAS_NEGOCIACAO: { abertura: 60, conscienciosidade: 85, extroversao: 80, amabilidade: 40, estabilidade: 85 },
+  // === NÍVEL 5: GESTÃO DE PESSOAS E BEM-ESTAR ===
+  DESENVOLVEDOR_TALENTOS: { abertura: 90, conscienciosidade: 65, extroversao: 80, amabilidade: 90, estabilidade: 75 }, // Escola Judicial, Capacitação
+  GESTOR_ADMINISTRATIVO_RH: { abertura: 40, conscienciosidade: 95, extroversao: 50, amabilidade: 60, estabilidade: 80 }, // Pagamento, Frequência, Legislação
+  CUIDADOR_SAUDE_ORGANIZACIONAL: { abertura: 65, conscienciosidade: 75, extroversao: 70, amabilidade: 95, estabilidade: 85 }, // Saúde, Psicossocial, Benefícios
 
-  // TECNOLOGIA E PROJETOS
-  TIC_INOVACAO_AGILE: { abertura: 95, conscienciosidade: 60, extroversao: 60, amabilidade: 70, estabilidade: 75 },
-  TIC_INFRA_ESTRUTURADA: { abertura: 45, conscienciosidade: 90, extroversao: 40, amabilidade: 55, estabilidade: 80 },
-  ENGENHARIA_TECNICA: { abertura: 65, conscienciosidade: 90, extroversao: 40, amabilidade: 45, estabilidade: 80 },
+  // === NÍVEL 6: TECNOLOGIA DA INFORMAÇÃO ===
+  INOVADOR_TECNOLOGICO: { abertura: 98, conscienciosidade: 60, extroversao: 60, amabilidade: 70, estabilidade: 75 }, // Inovação, LIODS
+  ENGENHEIRO_SOFTWARE: { abertura: 90, conscienciosidade: 85, extroversao: 35, amabilidade: 55, estabilidade: 75 }, // Desenvolvimento de Sistemas
+  ARQUITETO_INFRAESTRUTURA_TI: { abertura: 60, conscienciosidade: 95, extroversao: 30, amabilidade: 50, estabilidade: 90 }, // Redes, Segurança Info, Banco de Dados
+  SUPORTE_TECNICO_EMPATICO: { abertura: 60, conscienciosidade: 80, extroversao: 75, amabilidade: 85, estabilidade: 85 }, // Service Desk, Atendimento ao Usuário
 
-  // GESTÃO DE PESSOAS E CULTURA
-  RH_ACOLHIMENTO: { abertura: 75, conscienciosidade: 50, extroversao: 85, amabilidade: 95, estabilidade: 70 },
-  RH_NORMATIVO: { abertura: 35, conscienciosidade: 95, extroversao: 50, amabilidade: 60, estabilidade: 85 },
-  COMUNICACAO_CRIATIVA: { abertura: 95, conscienciosidade: 55, extroversao: 90, amabilidade: 80, estabilidade: 65 }
+  // === NÍVEL 7: LOGÍSTICA E INFRAESTRUTURA ===
+  GESTOR_CONTRATOS_LICITACOES: { abertura: 45, conscienciosidade: 98, extroversao: 50, amabilidade: 40, estabilidade: 90 }, // Licitações, Contratos Adm
+  LOGISTICA_PATRIMONIAL: { abertura: 40, conscienciosidade: 90, extroversao: 60, amabilidade: 60, estabilidade: 80 }, // Material, Almoxarifado, Transporte
+  ENGENHEIRO_MANUTENCAO_PREDIAL: { abertura: 50, conscienciosidade: 90, extroversao: 55, amabilidade: 50, estabilidade: 85 }, // Engenharia, Manutenção
+
+  // === NÍVEL 8: SEGURANÇA E INTELIGÊNCIA ===
+  ANALISTA_INTELIGENCIA_SEGURANCA: { abertura: 75, conscienciosidade: 90, extroversao: 40, amabilidade: 30, estabilidade: 95 }, // Inteligência Policial, Riscos
+  AGENTE_OPERACIONAL_OSTENSIVO: { abertura: 30, conscienciosidade: 90, extroversao: 60, amabilidade: 35, estabilidade: 98 }, // Segurança Física, Operações Táticas
+  GESTOR_SEGURANCA_ESTRATEGICA: { abertura: 50, conscienciosidade: 95, extroversao: 70, amabilidade: 45, estabilidade: 95 }, // Coordenação Polícia Judicial
+
+  // === NÍVEL 9: COMUNICAÇÃO E MEMÓRIA ===
+  COMUNICADOR_INSTITUCIONAL: { abertura: 90, conscienciosidade: 60, extroversao: 95, amabilidade: 85, estabilidade: 70 }, // Imprensa, Marketing
+  CERIMONIALISTA_PROTOCOLAR: { abertura: 65, conscienciosidade: 90, extroversao: 85, amabilidade: 80, estabilidade: 80 }, // Cerimonial, Eventos
+  CURADOR_MEMORIA_BIBLIOTECA: { abertura: 70, conscienciosidade: 85, extroversao: 35, amabilidade: 60, estabilidade: 75 }, // Biblioteca, Memória
+
+  // === NÍVEL 10: APOIO ADMINISTRATIVO GERAL ===
+  ASSISTENTE_ADMINISTRATIVO_ROTINA: { abertura: 35, conscienciosidade: 85, extroversao: 50, amabilidade: 75, estabilidade: 75 }, // Protocolo, Arquivo, Apoio Geral
+  SECRETARIO_EXECUTIVO: { abertura: 50, conscienciosidade: 95, extroversao: 65, amabilidade: 80, estabilidade: 85 } // Secretariado de Gabinetes/Diretorias
 };
 
-// --- BASE DE DADOS COMPLETA DE UNIDADES TRT11 ---
-const unidadesTRT11 = [
-  // --- ALTA ADMINISTRAÇÃO ---
-  { id: 'presidencia', nome: 'PRESIDÊNCIA', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.LIDERANCA_VISIONARIA, competencias: ['Visão Estratégica', 'Liderança', 'Articulação Política'] },
-  { id: 'dg', nome: 'DIRETORIA-GERAL', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.LIDERANCA_VISIONARIA, competencias: ['Gestão Executiva', 'Tomada de Decisão', 'Visão Sistêmica'] },
-  { id: 'gab_dg', nome: 'GABINETE DA DIRETORIA-GERAL', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.GESTAO_OPERACIONAL_ALTA, competencias: ['Suporte Executivo', 'Organização', 'Discrição'] },
-  { id: 'sec_geral_pres', nome: 'SECRETARIA-GERAL DA PRESIDÊNCIA', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.GESTAO_OPERACIONAL_ALTA, competencias: ['Gestão de Fluxos', 'Comunicação Oficial', 'Protocolo'] },
-  { id: 'ass_ordenanca', nome: 'ASSESSORIA DE ORDENANÇA', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.LOGISTICA_DINAMICA, competencias: ['Logística', 'Disciplina', 'Prontidão'] },
-  { id: 'div_apoio_vp', nome: 'DIVISÃO DE APOIO À VICE-PRESIDÊNCIA', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['Gestão de Admissibilidade', 'Apoio Administrativo'] },
-  { id: 'sec_ass_jur_adm', nome: 'SECRETARIA DE ASSESSORAMENTO JURÍDICO-ADMINISTRATIVO', setor: 'Alta Administração', categoria: 'Presidência e Direção', perfil_ideal: ARQUETIPOS.JURIDICO_INTELECTUAL, competencias: ['Pareceres Jurídicos', 'Direito Administrativo'] },
+// --- LISTA DE POSTOS DE TRABALHO (Mapeamento 1:1 com novos Arquétipos) ---
+const postosTrabalho = [
+  // --- ALTA GESTÃO E GABINETES ---
+  { id: '1', nome: 'DIRETOR GERAL (DG)', setor: 'Alta Gestão', categoria: 'Direção Geral', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '2', nome: 'SECRETARIA-GERAL DA PRESIDÊNCIA (SGP)', setor: 'Alta Gestão', categoria: 'Direção Geral', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '3', nome: 'SECRETARIA GERAL JUDICIÁRIA (SGJ)', setor: 'Judiciário', categoria: 'Direção Geral', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '4', nome: 'ASSESSOR-CHEFE DE GABINETE (GAB)', setor: 'Alta Gestão', categoria: 'Chefia de Gabinete', perfil_ideal: ARQUETIPOS.LIDER_POLITICO_ADMINISTRATIVO },
+  { id: '5', nome: 'CHEFE DO GABINETE DA SAD (GABSAD)', setor: 'Administrativo', categoria: 'Chefia de Gabinete', perfil_ideal: ARQUETIPOS.LIDER_POLITICO_ADMINISTRATIVO },
+  { id: '6', nome: 'CHEFE DO GABINETE DA SGPES (GABSGPES)', setor: 'Gestão de Pessoas', categoria: 'Chefia de Gabinete', perfil_ideal: ARQUETIPOS.LIDER_POLITICO_ADMINISTRATIVO },
+  { id: '7', nome: 'CHEFE DO GABINETE DA SETIC (GABSETIC)', setor: 'TIC', categoria: 'Chefia de Gabinete', perfil_ideal: ARQUETIPOS.LIDER_POLITICO_ADMINISTRATIVO },
+  { id: '8', nome: 'GABINETE DE APOIO À CORREGEDORIA (GABCORREGI)', setor: 'Corregedoria', categoria: 'Apoio Gabinete', perfil_ideal: ARQUETIPOS.SECRETARIO_EXECUTIVO },
+  { id: '9', nome: 'GABINETE DE APOIO À EJUD (GABEJUD)', setor: 'Educação', categoria: 'Apoio Gabinete', perfil_ideal: ARQUETIPOS.SECRETARIO_EXECUTIVO },
+  { id: '10', nome: 'GABINETE DE APOIO À SECRETARIA-GERAL JUDICIÁRIA (GABSGJ)', setor: 'Judiciário', categoria: 'Apoio Gabinete', perfil_ideal: ARQUETIPOS.SECRETARIO_EXECUTIVO },
+  { id: '11', nome: 'GABINETE DE APOIO À SEGEST (GABSEGGEST)', setor: 'Estratégia', categoria: 'Apoio Gabinete', perfil_ideal: ARQUETIPOS.SECRETARIO_EXECUTIVO },
+  { id: '12', nome: 'GABINETE DE APOIO À SGP (GABSGP)', setor: 'Alta Gestão', categoria: 'Apoio Gabinete', perfil_ideal: ARQUETIPOS.SECRETARIO_EXECUTIVO },
+  { id: '13', nome: 'GABINETE DE APOIO À SOF (GABSOF)', setor: 'Financeiro', categoria: 'Apoio Gabinete', perfil_ideal: ARQUETIPOS.SECRETARIO_EXECUTIVO },
+  { id: '14', nome: 'DIVISÃO DE APOIO À VICE-PRESIDÊNCIA (DIVVP)', setor: 'Alta Gestão', categoria: 'Apoio Gabinete', perfil_ideal: ARQUETIPOS.SECRETARIO_EXECUTIVO },
+  { id: '15', nome: 'SECRETARIA DE ASSESSORAMENTO JURÍDICO-ADMINISTRATIVO (SECJAD)', setor: 'Alta Gestão', categoria: 'Assessoria Jurídica', perfil_ideal: ARQUETIPOS.JURISTA_ANALITICO_SENIOR },
+  { id: '16', nome: 'ASSESSORIA DE ORDENANÇA (ASSORD)', setor: 'Alta Gestão', categoria: 'Apoio Executivo', perfil_ideal: ARQUETIPOS.ASSISTENTE_ADMINISTRATIVO_ROTINA },
+  { id: '129', nome: 'ASSESSOR TÉCNICO DE GABINETE DE DESEMBARGADOR', setor: 'Judiciário', categoria: 'Assessoria Jurídica', perfil_ideal: ARQUETIPOS.JURISTA_ANALITICO_SENIOR },
+  { id: '130', nome: 'ASSESSOR DE JUIZ SUBSTITUTO', setor: 'Judiciário', categoria: 'Assessoria Jurídica', perfil_ideal: ARQUETIPOS.JURISTA_ANALITICO_SENIOR },
+  { id: '131', nome: 'ASSISTENTE DE JUIZ TITULAR', setor: 'Judiciário', categoria: 'Apoio Judiciário', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_JUDICIARIO },
 
-  // --- CORREGEDORIA ---
-  { id: 'sec_corregedoria', nome: 'SECRETARIA DA CORREGEDORIA REGIONAL', setor: 'Corregedoria', categoria: 'Corregedoria', perfil_ideal: ARQUETIPOS.AUDITORIA_RIGOROSA, competencias: ['Fiscalização', 'Normatização', 'Gestão Correicional'] },
-  { id: 'coord_apoio_correg', nome: 'COORDENADORIA DE APOIO À SECRETARIA DA CORREGEDORIA', setor: 'Corregedoria', categoria: 'Corregedoria', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['Apoio Administrativo', 'Organização de Correicões'] },
-  { id: 'gab_apoio_correg', nome: 'GABINETE DE APOIO À CORREGEDORIA', setor: 'Corregedoria', categoria: 'Corregedoria', perfil_ideal: ARQUETIPOS.JURIDICO_INTELECTUAL, competencias: ['Suporte Técnico', 'Análise Processual'] },
+  // --- ESTRATÉGIA, GOVERNANÇA E DADOS ---
+  { id: '17', nome: 'SECRETARIA DE GOVERNANÇA E GESTÃO ESTRATÉGICA (SEGGEST)', setor: 'Estratégia', categoria: 'Governança', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '18', nome: 'ASSESSORIA DE GOVERNANÇA DE GESTÃO DE PESSOAS (ASSEGESP)', setor: 'Gestão de Pessoas', categoria: 'Governança', perfil_ideal: ARQUETIPOS.CONSELHEIRO_GOVERNANCA },
+  { id: '19', nome: 'ASSESSORIA DE INTEGRIDADE E GESTÃO DE RISCOS (ASSIGER)', setor: 'Alta Gestão', categoria: 'Compliance', perfil_ideal: ARQUETIPOS.CONSELHEIRO_GOVERNANCA },
+  { id: '20', nome: 'COORDENADORIA DE GOVERNANÇA DE CONTRATAÇÕES E OBRAS (COGCO)', setor: 'Administrativo', categoria: 'Governança', perfil_ideal: ARQUETIPOS.CONSELHEIRO_GOVERNANCA },
+  { id: '21', nome: 'DIVISÃO DE PROJETOS E DE INICIATIVAS NACIONAIS (DIPIN)', setor: 'Estratégia', categoria: 'Projetos', perfil_ideal: ARQUETIPOS.GESTOR_PROJETOS_TIC },
+  { id: '22', nome: 'DIVISÃO DE ESTATÍSTICA (DIVIEST)', setor: 'Estratégia', categoria: 'Estatística', perfil_ideal: ARQUETIPOS.CIENTISTA_DADOS_ESTATISTICO },
+  { id: '23', nome: 'SEÇÃO TÉCNICA DO E-GESTÃO E DATAJUD (SETDATA)', setor: 'Estratégia', categoria: 'Dados Judiciais', perfil_ideal: ARQUETIPOS.CIENTISTA_DADOS_ESTATISTICO },
+  { id: '24', nome: 'CHEFE DA SEMAGE (SEÇÃO DE MONITORAMENTO E AVALIAÇÃO)', setor: 'Estratégia', categoria: 'Monitoramento', perfil_ideal: ARQUETIPOS.CIENTISTA_DADOS_ESTATISTICO },
+  { id: '25', nome: 'SEÇÃO DE NEGÓCIOS (SENEG)', setor: 'Estratégia', categoria: 'Negócios', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '26', nome: 'SEÇÃO DE GERENCIAMENTO DE PROCESSOS DE NEGÓCIOS (SEGENE)', setor: 'Estratégia', categoria: 'Processos', perfil_ideal: ARQUETIPOS.CONSELHEIRO_GOVERNANCA },
+  { id: '27', nome: 'SEÇÃO DE GESTÃO SOCIOAMBIENTAL, ACESSIBILIDADE E INCLUSÃO', setor: 'Estratégia', categoria: 'Sustentabilidade', perfil_ideal: ARQUETIPOS.DESENVOLVEDOR_TALENTOS },
+  { id: '28', nome: 'DIVISÃO DE APOIO EXTERNO INSTITUCIONAL (DIVAEI)', setor: 'Estratégia', categoria: 'Relações Institucionais', perfil_ideal: ARQUETIPOS.COMUNICADOR_INSTITUCIONAL },
 
-  // --- JUDICIÁRIO ---
-  { id: 'gab_desembargador', nome: 'GABINETE DESEMBARGADOR', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.JURIDICO_INTELECTUAL, competencias: ['Técnica Jurídica', 'Redação de Votos', 'Pesquisa Jurisprudencial'] },
-  { id: 'sec_vara_trabalho', nome: 'SECRETARIA DE VARA DO TRABALHO', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.JURIDICO_PROCEDIMENTAL, competencias: ['Atendimento', 'Celeridade Processual', 'PJe'] },
-  { id: 'sec_pleno', nome: 'SECRETARIA DO TRIBUNAL PLENO E SEÇÕES ESPECIALIZADAS', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.GESTAO_OPERACIONAL_ALTA, competencias: ['Gestão de Sessões', 'Ata de Julgamento'] },
-  { id: 'coord_apoio_turma', nome: 'COORDENADORIA DE APOIO À TURMA', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.JURIDICO_PROCEDIMENTAL, competencias: ['Apoio a Sessões', 'Gestão de Pauta'] },
-  { id: 'gab_apoio_sgj', nome: 'GABINETE DE APOIO À SECRETARIA-GERAL JUDICIÁRIA', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['Suporte Administrativo', 'Gestão Judiciária'] },
-  { id: 'nucleo_recursos', nome: 'NÚCLEO DE RECURSOS', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.JURIDICO_INTELECTUAL, competencias: ['Admissibilidade Recursal', 'Análise Técnica', 'Prazos'] },
-  { id: 'centro_intel_prec', nome: 'CENTRO DE INTELIGÊNCIA - PRECEDENTES', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.ANALISE_DADOS_JURIDICOS, competencias: ['Pesquisa Jurídica', 'Gestão de Precedentes'] },
-  { id: 'sec_jurisprudencia', nome: 'SEÇÃO DE JURISPRUDÊNCIA', setor: 'Judiciário', categoria: 'Unidades Judiciárias', perfil_ideal: ARQUETIPOS.ANALISE_DADOS_JURIDICOS, competencias: ['Sistematização', 'Pesquisa', 'Catalogação'] },
-  { id: 'div_contadoria', nome: 'DIVISÃO DE CONTADORIA JURÍDICA', setor: 'Judiciário', categoria: 'Apoio Judiciário', perfil_ideal: ARQUETIPOS.CALCULOS_FINANCAS, competencias: ['Cálculos Judiciais', 'Matemática Financeira', 'PJe-Calc'] },
-  { id: 'div_coop_jud', nome: 'DIVISÃO DE COOPERAÇÃO JUDICIÁRIA', setor: 'Judiciário', categoria: 'Apoio Judiciário', perfil_ideal: ARQUETIPOS.ATENDIMENTO_EMPATICO, competencias: ['Comunicação Interinstitucional', 'Cartas Precatórias'] },
-  { id: 'div_exec_conc', nome: 'DIVISÃO DE EXECUÇÃO CONCENTRADA', setor: 'Judiciário', categoria: 'Apoio Judiciário', perfil_ideal: ARQUETIPOS.JURIDICO_PROCEDIMENTAL, competencias: ['Execução Trabalhista', 'Reunião de Processos'] },
-  { id: 'div_pesq_patrimonial', nome: 'DIVISÃO DE PESQUISA PATRIMONIAL', setor: 'Judiciário', categoria: 'Apoio Judiciário', perfil_ideal: ARQUETIPOS.DILIGENCIA_SEGURANCA, competencias: ['Investigação Patrimonial', 'Análise de Dados'] },
-  { id: 'sec_exec_fazenda', nome: 'SECRETARIA DE EXECUÇÃO DA FAZENDA PÚBLICA', setor: 'Judiciário', categoria: 'Apoio Judiciário', perfil_ideal: ARQUETIPOS.JURIDICO_PROCEDIMENTAL, competencias: ['Gestão de Precatórios', 'Direito Público'] },
+  // --- JURÍDICO E SECRETARIAS PROCESSUAIS ---
+  { id: '29', nome: 'SECRETARIA DA CORREGEDORIA REGIONAL (SCR)', setor: 'Corregedoria', categoria: 'Gestão Judiciária', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_JUDICIARIO },
+  { id: '30', nome: 'COORDENADORIA DE APOIO À SECRETARIA DA CORREGEDORIA (COOASCR)', setor: 'Corregedoria', categoria: 'Apoio Administrativo', perfil_ideal: ARQUETIPOS.ASSISTENTE_ADMINISTRATIVO_ROTINA },
+  { id: '31', nome: 'COORDENADORIA JURÍDICA DA CORREGEDORIA (COOJUCOR)', setor: 'Corregedoria', categoria: 'Assessoria Jurídica', perfil_ideal: ARQUETIPOS.JURISTA_ANALITICO_SENIOR },
+  { id: '32', nome: 'SECRETARIA DO TRIBUNAL PLENO E SEÇÕES ESPECIALIZADAS (STPSE)', setor: 'Judiciário', categoria: 'Pleno', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_JUDICIARIO },
+  { id: '33', nome: 'COORDENADORIA DE APOIO À TURMA (COAT1, COAT2, COAT3)', setor: 'Judiciário', categoria: 'Secretaria de Turma', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_JUDICIARIO },
+  { id: '34', nome: 'DIRETOR DE SECRETARIA DE VARA DO TRABALHO', setor: 'Judiciário', categoria: 'Direção de Vara', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_JUDICIARIO },
+  { id: '35', nome: 'SECRETARIA DE VARA DO TRABALHO (SECVT)', setor: 'Judiciário', categoria: 'Vara do Trabalho', perfil_ideal: ARQUETIPOS.PROCESSUALISTA_EXECUTOR },
+  { id: '36', nome: 'DIVISÃO DE DISTRIBUIÇÃO DOS FEITOS (DIVDIF)', setor: 'Judiciário', categoria: 'Distribuição', perfil_ideal: ARQUETIPOS.PROCESSUALISTA_EXECUTOR },
+  { id: '37', nome: 'CHEFE DA SEJURIS (SEÇÃO DE JURISPRUDÊNCIA)', setor: 'Judiciário', categoria: 'Jurisprudência', perfil_ideal: ARQUETIPOS.JURISTA_ANALITICO_SENIOR },
+  { id: '38', nome: 'CENTRO DE INTELIGÊNCIA - COORDENADORIA DE PRECEDENTES (CIPAC)', setor: 'Judiciário', categoria: 'Inteligência Jurídica', perfil_ideal: ARQUETIPOS.JURISTA_ANALITICO_SENIOR },
+  { id: '39', nome: 'DIVISÃO DE COOPERAÇÃO JUDICIÁRIA (DICOOP)', setor: 'Judiciário', categoria: 'Cooperação', perfil_ideal: ARQUETIPOS.MEDIADOR_CONCILIADOR },
+  { id: '40', nome: 'SECRETARIA DE EXECUÇÃO DA FAZENDA PÚBLICA - PRECATÓRIOS', setor: 'Judiciário', categoria: 'Execução', perfil_ideal: ARQUETIPOS.CALCULISTA_JUDICIAL },
+  { id: '41', nome: 'DIVISÃO DE EXECUÇÃO CONCENTRADA (DECON)', setor: 'Judiciário', categoria: 'Execução', perfil_ideal: ARQUETIPOS.PROCESSUALISTA_EXECUTOR },
+  { id: '42', nome: 'DIVISÃO DE PESQUISA PATRIMONIAL (DIPEP)', setor: 'Judiciário', categoria: 'Pesquisa Patrimonial', perfil_ideal: ARQUETIPOS.ANALISTA_INTELIGENCIA_SEGURANCA },
+  { id: '43', nome: 'CHEFE DA SEHASP (SEÇÃO DE HASTA PÚBLICA)', setor: 'Judiciário', categoria: 'Execução', perfil_ideal: ARQUETIPOS.PROCESSUALISTA_EXECUTOR },
+  { id: '44', nome: 'SEÇÃO DE MANDADOS JUDICIAIS (SEMAJUD)', setor: 'Judiciário', categoria: 'Mandados', perfil_ideal: ARQUETIPOS.PROCESSUALISTA_EXECUTOR },
+  { id: '45', nome: 'DIVISÃO DE ADMINISTRAÇÃO DO FTBV E MANDADOS JUDICIAIS', setor: 'Administrativo', categoria: 'Apoio Mandados', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_ADMINISTRATIVO },
+  { id: '46', nome: 'DIVISÃO DE ADMINISTRAÇÃO DO FTM (DIVAFTM)', setor: 'Administrativo', categoria: 'Apoio Fórum', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_ADMINISTRATIVO },
+  { id: '47', nome: 'DIVISÃO DE CONTADORIA JURÍDICA (DICONJUD)', setor: 'Judiciário', categoria: 'Contadoria', perfil_ideal: ARQUETIPOS.CALCULISTA_JUDICIAL },
+  { id: '132', nome: 'CALCULISTA JUDICIAL', setor: 'Judiciário', categoria: 'Cálculos', perfil_ideal: ARQUETIPOS.CALCULISTA_JUDICIAL },
+  { id: '133', nome: 'SECRETÁRIO DE AUDIÊNCIA', setor: 'Judiciário', categoria: 'Apoio Audiência', perfil_ideal: ARQUETIPOS.PROCESSUALISTA_EXECUTOR },
+  { id: '137', nome: 'CHEFE DE NÚCLEO DE APOIO ÀS VARAS DO INTERIOR', setor: 'Judiciário', categoria: 'Apoio Remoto', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_JUDICIARIO },
+  { id: '138', nome: 'COORDENADOR DE PLANTÃO JUDICIÁRIO', setor: 'Judiciário', categoria: 'Gestão Plantão', perfil_ideal: ARQUETIPOS.GESTOR_OPERACIONAL_JUDICIARIO },
 
-  // --- APOIO E DISTRIBUIÇÃO ---
-  { id: 'div_dist_manaus', nome: 'DIVISÃO DE DISTRIBUIÇÃO DOS FEITOS (MANAUS)', setor: 'Judiciário', categoria: 'Apoio e Distribuição', perfil_ideal: ARQUETIPOS.LOGISTICA_OPERACIONAL, competencias: ['Distribuição Processual', 'Agilidade'] },
-  { id: 'div_dist_bv', nome: 'DIVISÃO DE DISTRIBUIÇÃO DOS FEITOS (BOA VISTA)', setor: 'Judiciário', categoria: 'Apoio e Distribuição', perfil_ideal: ARQUETIPOS.LOGISTICA_OPERACIONAL, competencias: ['Distribuição Processual', 'Agilidade'] },
-  { id: 'div_adm_ftm', nome: 'DIVISÃO DE ADMINISTRAÇÃO DO FTM', setor: 'Administrativo', categoria: 'Apoio e Distribuição', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['Gestão Predial', 'Apoio Logístico'] },
-  { id: 'sec_mandados', nome: 'SEÇÃO DE MANDADOS JUDICIAIS', setor: 'Judiciário', categoria: 'Apoio e Distribuição', perfil_ideal: ARQUETIPOS.DILIGENCIA_SEGURANCA, competencias: ['Diligências Externas', 'Cumprimento de Ordens'] },
-  { id: 'sec_hasta', nome: 'SEÇÃO DE HASTA PÚBLICA', setor: 'Judiciário', categoria: 'Apoio e Distribuição', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['Leilões Judiciais', 'Organização de Eventos'] },
-  { id: 'div_apoio_cejusc_ftm', nome: 'DIVISÃO DE APOIO AO CEJUSC FTM', setor: 'Conciliação', categoria: 'Apoio e Distribuição', perfil_ideal: ARQUETIPOS.JURIDICO_CONCILIADOR, competencias: ['Conciliação', 'Atendimento Humanizado', 'Negociação'] },
-  { id: 'coord_metodos_consensuais', nome: 'NÚCLEO PERMANENTE DE MÉTODOS CONSENSUAIS', setor: 'Conciliação', categoria: 'Apoio e Distribuição', perfil_ideal: ARQUETIPOS.JURIDICO_CONCILIADOR, competencias: ['Gestão de Conflitos', 'Planejamento'] },
+  // --- CONCILIAÇÃO ---
+  { id: '48', nome: 'DIRETOR DO NUPEMEC', setor: 'Conciliação', categoria: 'Gestão Conciliação', perfil_ideal: ARQUETIPOS.MEDIADOR_CONCILIADOR },
+  { id: '49', nome: 'COORDENADORIA DE APOIO AO NUPEMEC (COONUPEMEC)', setor: 'Conciliação', categoria: 'Apoio Conciliação', perfil_ideal: ARQUETIPOS.MEDIADOR_CONCILIADOR },
+  { id: '50', nome: 'DIVISÃO DE APOIO AO CEJUSC', setor: 'Conciliação', categoria: 'Conciliação', perfil_ideal: ARQUETIPOS.MEDIADOR_CONCILIADOR },
 
-  // --- ADMINISTRAÇÃO E LOGÍSTICA ---
-  { id: 'sec_adm', nome: 'SECRETARIA DE ADMINISTRAÇÃO', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.GESTAO_OPERACIONAL_ALTA, competencias: ['Gestão Administrativa', 'Coordenação'] },
-  { id: 'gab_apoio_sad', nome: 'GABINETE DE APOIO À SAD', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['Suporte Administrativo', 'Redação'] },
-  { id: 'coord_mat_log', nome: 'COORDENADORIA DE MATERIAL E LOGÍSTICA', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.LOGISTICA_DINAMICA, competencias: ['Logística', 'Gestão de Estoque'] },
-  { id: 'coord_lic_contratos', nome: 'COORDENADORIA DE LICITAÇÃO E CONTRATOS', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.AUDITORIA_RIGOROSA, competencias: ['Legislação de Licitações', 'Gestão Contratual'] },
-  { id: 'coord_gov_contratacoes', nome: 'COORDENADORIA DE GOVERNANÇA DE CONTRATAÇÕES', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.LIDERANCA_VISIONARIA, competencias: ['Governança', 'Planejamento'] },
-  { id: 'sec_compras', nome: 'SEÇÃO DE COMPRAS', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.COMPRAS_NEGOCIACAO, competencias: ['Pesquisa de Preço', 'Negociação'] },
-  { id: 'sec_contratos', nome: 'SEÇÃO DE CONTRATOS', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.AUDITORIA_RIGOROSA, competencias: ['Gestão Contratual', 'Análise Documental'] },
-  { id: 'sec_licitacao', nome: 'SEÇÃO DE LICITAÇÃO', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.AUDITORIA_RIGOROSA, competencias: ['Pregão', 'Editais'] },
-  { id: 'sec_almoxarifado', nome: 'SEÇÃO DE ALMOXARIFADO', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.LOGISTICA_OPERACIONAL, competencias: ['Controle de Estoque', 'Logística'] },
-  { id: 'sec_patrimonio', nome: 'SEÇÃO DE PATRIMÔNIO', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.LOGISTICA_OPERACIONAL, competencias: ['Inventário', 'Controle de Bens'] },
-  { id: 'sec_transporte', nome: 'SEÇÃO DE TRANSPORTE', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.LOGISTICA_OPERACIONAL, competencias: ['Logística de Frota', 'Manutenção Veicular'] },
-  { id: 'sec_zeladoria', nome: 'SEÇÃO DE ZELADORIA', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.LOGISTICA_OPERACIONAL, competencias: ['Limpeza', 'Conservação'] },
-  { id: 'div_passagens', nome: 'DIVISÃO DE PASSAGENS E DIÁRIAS', setor: 'Administrativo', categoria: 'Administração e Logística', perfil_ideal: ARQUETIPOS.ATENDIMENTO_EMPATICO, competencias: ['Logística de Viagem', 'Atendimento'] },
-
-  // --- INFRAESTRUTURA ---
-  { id: 'coord_manut_proj', nome: 'COORDENADORIA DE MANUTENÇÃO E PROJETOS', setor: 'Infraestrutura', categoria: 'Infraestrutura', perfil_ideal: ARQUETIPOS.ENGENHARIA_TECNICA, competencias: ['Gestão de Obras', 'Projetos'] },
-  { id: 'nucleo_eng_arq', nome: 'NÚCLEO DE ENGENHARIA E ARQUITETURA', setor: 'Infraestrutura', categoria: 'Infraestrutura', perfil_ideal: ARQUETIPOS.ENGENHARIA_TECNICA, competencias: ['Engenharia', 'Arquitetura'] },
-  { id: 'sec_eng', nome: 'SEÇÃO DE ENGENHARIA', setor: 'Infraestrutura', categoria: 'Infraestrutura', perfil_ideal: ARQUETIPOS.ENGENHARIA_TECNICA, competencias: ['Cálculo Estrutural', 'Fiscalização de Obras'] },
-  { id: 'sec_arq', nome: 'SEÇÃO DE ARQUITETURA', setor: 'Infraestrutura', categoria: 'Infraestrutura', perfil_ideal: ARQUETIPOS.ENGENHARIA_TECNICA, competencias: ['Layout', 'Projetos Arquitetônicos'] },
-  { id: 'sec_manut_bens', nome: 'SEÇÃO DE MANUTENÇÃO DE BENS', setor: 'Infraestrutura', categoria: 'Infraestrutura', perfil_ideal: ARQUETIPOS.LOGISTICA_OPERACIONAL, competencias: ['Reparos', 'Manutenção Predial'] },
-
-  // --- GESTÃO DE PESSOAS ---
-  { id: 'sec_sgp', nome: 'SECRETARIA DE GESTÃO DE PESSOAS', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.LIDERANCA_ESTRATEGICA, competencias: ['Gestão de RH', 'Estratégia'] },
-  { id: 'gab_apoio_sgp', nome: 'GABINETE DE APOIO À SGP', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.SUPORTE_ADMINISTRATIVO, competencias: ['Suporte Administrativo', 'Comunicação'] },
-  { id: 'ass_gov_sgp', nome: 'ASSESSORIA DE GOVERNANÇA DE GESTÃO DE PESSOAS', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.GESTAO_EXECUTIVA, competencias: ['Governança', 'Indicadores'] },
-  { id: 'coord_saude', nome: 'COORDENADORIA DE SAÚDE', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.RH_ACOLHIMENTO, competencias: ['Gestão de Saúde', 'Acolhimento'] },
-  { id: 'coord_inf_func', nome: 'COORDENADORIA DE INFORMAÇÕES FUNCIONAIS', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.RH_NORMATIVO, competencias: ['Dados Funcionais', 'Sigilo'] },
-  { id: 'coord_pag_pessoal', nome: 'COORD. DE GESTÃO DE PAGAMENTO DE PESSOAL', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.RH_NORMATIVO, competencias: ['Folha de Pagamento', 'Conformidade'] },
-  { id: 'coord_desenv_pessoas', nome: 'COORD. DE GESTÃO DO DESENVOLVIMENTO', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.RH_DESENVOLVIMENTO, competencias: ['Treinamento', 'Desenvolvimento'] },
-  { id: 'div_leg_pessoal', nome: 'DIVISÃO DE LEGISLAÇÃO DE PESSOAL', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.JURIDICO_SENIOR, competencias: ['Legislação', 'Pareceres'] },
-  { id: 'sec_pag_magistrados', nome: 'SEÇÃO DE PAGAMENTO A MAGISTRADOS', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.RH_NORMATIVO, competencias: ['Cálculos Complexos', 'Sigilo'] },
-  { id: 'sec_pag_servidores', nome: 'SEÇÃO DE PAGAMENTO A SERVIDORES', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.RH_NORMATIVO, competencias: ['Folha de Servidores', 'Atenção'] },
-  { id: 'sec_beneficios', nome: 'SEÇÃO DE BENEFÍCIOS E ESTÁGIO', setor: 'SGP', categoria: 'Gestão de Pessoas', perfil_ideal: ARQUETIPOS.ATENDIMENTO_PUBLICO, competencias: ['Gestão de Benefícios', 'Atendimento'] },
+  // --- GESTÃO DE PESSOAS E SAÚDE ---
+  { id: '51', nome: 'SECRETARIA DE GESTÃO DE PESSOAS (SGPES)', setor: 'Gestão de Pessoas', categoria: 'Secretaria', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '52', nome: 'COORDENADORIA DE GESTÃO DO DESENVOLVIMENTO DE PESSOAS (CODEP)', setor: 'Gestão de Pessoas', categoria: 'Desenvolvimento', perfil_ideal: ARQUETIPOS.DESENVOLVEDOR_TALENTOS },
+  { id: '53', nome: 'SEÇÃO DE GESTÃO DE PRÁTICAS PARA DESENVOLVER PESSOAS', setor: 'Gestão de Pessoas', categoria: 'Desenvolvimento', perfil_ideal: ARQUETIPOS.DESENVOLVEDOR_TALENTOS },
+  { id: '54', nome: 'COORDENADORIA DE GESTÃO DAS INFORMAÇÕES FUNCIONAIS (COGINF)', setor: 'Gestão de Pessoas', categoria: 'Dados Funcionais', perfil_ideal: ARQUETIPOS.GESTOR_ADMINISTRATIVO_RH },
+  { id: '55', nome: 'DIVISÃO DE LEGISLAÇÃO DE PESSOAL (DILEP)', setor: 'Gestão de Pessoas', categoria: 'Legislação', perfil_ideal: ARQUETIPOS.JURISTA_ANALITICO_SENIOR },
+  { id: '56', nome: 'CHEFE DA SESERV (SEÇÃO DE SERVIDORES ATIVOS)', setor: 'Gestão de Pessoas', categoria: 'Adm Pessoal', perfil_ideal: ARQUETIPOS.GESTOR_ADMINISTRATIVO_RH },
+  { id: '57', nome: 'SEÇÃO DE MAGISTRADOS (SEMAG)', setor: 'Gestão de Pessoas', categoria: 'Magistratura', perfil_ideal: ARQUETIPOS.GESTOR_ADMINISTRATIVO_RH },
+  { id: '58', nome: 'SEÇÃO DE BENEFÍCIOS E ESTÁGIO (SEBES)', setor: 'Gestão de Pessoas', categoria: 'Benefícios', perfil_ideal: ARQUETIPOS.CUIDADOR_SAUDE_ORGANIZACIONAL },
+  { id: '59', nome: 'SEÇÃO DE APOSENTADOS E PENSIONISTAS (SEAPP)', setor: 'Gestão de Pessoas', categoria: 'Inativos', perfil_ideal: ARQUETIPOS.CUIDADOR_SAUDE_ORGANIZACIONAL },
+  { id: '60', nome: 'COORDENADORIA DE GESTÃO DE PAGAMENTO DE PESSOAL (COPAP)', setor: 'Gestão de Pessoas', categoria: 'Pagamento', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '61', nome: 'CHEFE DA SEPAS (SEÇÃO DE PAGAMENTO A SERVIDORES)', setor: 'Gestão de Pessoas', categoria: 'Pagamento', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '62', nome: 'SEÇÃO DE PAGAMENTO DE PESSOAL (SEPAPE)', setor: 'Gestão de Pessoas', categoria: 'Pagamento', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '63', nome: 'SEÇÃO DE PAGAMENTO A MAGISTRADOS (SEPAM)', setor: 'Gestão de Pessoas', categoria: 'Pagamento', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '64', nome: 'SEÇÃO DE SUPORTE TÉCNICO À PREPARAÇÃO DA FOLHA (SETEC)', setor: 'Gestão de Pessoas', categoria: 'Folha', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '65', nome: 'COORDENADORIA DE SAÚDE (CODSAU)', setor: 'Saúde', categoria: 'Saúde', perfil_ideal: ARQUETIPOS.CUIDADOR_SAUDE_ORGANIZACIONAL },
 
   // --- ORÇAMENTO E FINANÇAS ---
-  { id: 'sec_sof', nome: 'SECRETARIA DE ORÇAMENTO E FINANÇAS', setor: 'SOF', categoria: 'Orçamento e Finanças', perfil_ideal: ARQUETIPOS.GESTAO_EXECUTIVA, competencias: ['Gestão Financeira', 'Responsabilidade Fiscal'] },
-  { id: 'coord_gestao_fin', nome: 'COORDENADORIA DE GESTÃO FINANCEIRA', setor: 'SOF', categoria: 'Orçamento e Finanças', perfil_ideal: ARQUETIPOS.AUDITORIA_COMPLIANCE, competencias: ['Execução Financeira', 'Controle'] },
-  { id: 'div_analise_contabil', nome: 'DIVISÃO DE ANÁLISE CONTÁBIL', setor: 'SOF', categoria: 'Orçamento e Finanças', perfil_ideal: ARQUETIPOS.CALCULOS_FINANCAS, competencias: ['Contabilidade', 'Tributos'] },
-  { id: 'sec_pag_bens', nome: 'SEÇÃO DE PAGAMENTO DE BENS E SERVIÇOS', setor: 'SOF', categoria: 'Orçamento e Finanças', perfil_ideal: ARQUETIPOS.RH_NORMATIVO, competencias: ['Pagamentos', 'Conferência'] },
+  { id: '66', nome: 'SECRETARIA DE ORÇAMENTO E FINANÇAS (SOF)', setor: 'Financeiro', categoria: 'Secretaria', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '67', nome: 'COORDENADORIA DE GESTÃO FINANCEIRA (COGEFIN)', setor: 'Financeiro', categoria: 'Finanças', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '68', nome: 'SEÇÃO DE AUDITORIA CONTÁBIL, ORÇAMENTÁRIA E FINANCEIRA', setor: 'Financeiro', categoria: 'Auditoria Financeira', perfil_ideal: ARQUETIPOS.AUDITOR_CONFORMIDADE_RIGOROSO },
+  { id: '69', nome: 'DIVISÃO DE GESTÃO, EMPENHO E SISTEMAS ORÇAMENTÁRIOS (DIGEORC)', setor: 'Financeiro', categoria: 'Orçamento', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '70', nome: 'DIVISÃO DE ANÁLISE CONTÁBIL, TRIBUTÁRIA E APOIO (DIVACONT)', setor: 'Financeiro', categoria: 'Contabilidade', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '71', nome: 'SEÇÃO DE APOIO AO PLANEJAMENTO E CONTROLE DE EXECUÇÃO', setor: 'Financeiro', categoria: 'Orçamento', perfil_ideal: ARQUETIPOS.ANALISTA_ORCAMENTARIO_FINANCEIRO },
+  { id: '72', nome: 'SEÇÃO DE ANÁLISE E CONFORMIDADE DE GESTÃO DE SUPRIMENTOS', setor: 'Financeiro', categoria: 'Conformidade', perfil_ideal: ARQUETIPOS.AUDITOR_CONFORMIDADE_RIGOROSO },
 
-  // --- ESTRATÉGIA E PROJETOS ---
-  { id: 'sec_gov_estrat', nome: 'SECRETARIA DE GOVERNANÇA E ESTRATÉGIA', setor: 'Estratégia', categoria: 'Estratégia e Projetos', perfil_ideal: ARQUETIPOS.LIDERANCA_ESTRATEGICA, competencias: ['Planejamento Estratégico', 'Metas'] },
-  { id: 'div_estatistica', nome: 'DIVISÃO DE ESTATÍSTICA', setor: 'Estratégia', categoria: 'Estratégia e Projetos', perfil_ideal: ARQUETIPOS.ANALISE_DADOS_JURIDICOS, competencias: ['Análise de Dados', 'Estatística'] },
-  { id: 'div_lab_inov', nome: 'LABORATÓRIO DE INOVAÇÃO (LIODS)', setor: 'Estratégia', categoria: 'Estratégia e Projetos', perfil_ideal: ARQUETIPOS.TIC_INOVACAO_AGILE, competencias: ['Inovação', 'Criatividade', 'Design Thinking'] },
-  { id: 'sec_auditoria', nome: 'SECRETARIA DE AUDITORIA', setor: 'Auditoria', categoria: 'Auditoria e Controle', perfil_ideal: ARQUETIPOS.AUDITORIA_COMPLIANCE, competencias: ['Auditoria Interna', 'Risco'] },
+  // --- CONTROLE INTERNO E AUDITORIA ---
+  { id: '73', nome: 'SECRETARIA DE AUDITORIA (SECAUD)', setor: 'Controle', categoria: 'Auditoria', perfil_ideal: ARQUETIPOS.AUDITOR_CONFORMIDADE_RIGOROSO },
+  { id: '74', nome: 'SEÇÃO DE AUDITORIA DE CONTRATAÇÕES E PATRIMÔNIO', setor: 'Controle', categoria: 'Auditoria', perfil_ideal: ARQUETIPOS.AUDITOR_CONFORMIDADE_RIGOROSO },
+  { id: '75', nome: 'SEÇÃO DE AUDITORIA DE GESTÃO DE PESSOAS (SEAGEP)', setor: 'Controle', categoria: 'Auditoria', perfil_ideal: ARQUETIPOS.AUDITOR_CONFORMIDADE_RIGOROSO },
 
-  // --- TIC (SETIC) ---
-  { id: 'sec_tic', nome: 'SECRETARIA DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÕES', setor: 'TIC', categoria: 'Tecnologia da Informação', perfil_ideal: ARQUETIPOS.LIDERANCA_ESTRATEGICA, competencias: ['Governança de TI', 'Inovação', 'Gestão Estratégica'] },
-  { id: 'coord_op_suporte', nome: 'COORDENADORIA DE OPERAÇÃO E SUPORTE', setor: 'TIC', categoria: 'Tecnologia da Informação', perfil_ideal: ARQUETIPOS.TIC_INFRA_ESTRUTURADA, competencias: ['Operações', 'Infraestrutura'] },
-  { id: 'div_seg_info', nome: 'DIVISÃO DE SEGURANÇA DA INFORMAÇÃO', setor: 'TIC', categoria: 'Tecnologia da Informação', perfil_ideal: ARQUETIPOS.AUDITORIA_COMPLIANCE, competencias: ['Cibersegurança', 'Riscos'] },
-  { id: 'div_sist_info', nome: 'DIVISÃO DE SISTEMA DE INFORMAÇÃO', setor: 'TIC', categoria: 'Tecnologia da Informação', perfil_ideal: ARQUETIPOS.TIC_DESENVOLVIMENTO, competencias: ['Desenvolvimento', 'Software'] },
-  { id: 'nucleo_cli_tic', nome: 'NÚCLEO DE ATENDIMENTO A CLIENTES DE TIC', setor: 'TIC', categoria: 'Tecnologia da Informação', perfil_ideal: ARQUETIPOS.ATENDIMENTO_EMPATICO, competencias: ['Service Desk', 'Suporte'] },
-  { id: 'sec_desenv_sist', nome: 'SEÇÃO DE DESENVOLVIMENTO DE SISTEMAS', setor: 'TIC', categoria: 'Tecnologia da Informação', perfil_ideal: ARQUETIPOS.TIC_DESENVOLVIMENTO, competencias: ['Programação', 'Engenharia de Software'] },
-  { id: 'sec_tec_pje', nome: 'SEÇÃO TÉCNICA DO PJE', setor: 'TIC', categoria: 'Tecnologia da Informação', perfil_ideal: ARQUETIPOS.TIC_DESENVOLVIMENTO, competencias: ['PJe', 'Configuração'] },
+  // --- ADMINISTRATIVO, CONTRATOS E LOGÍSTICA ---
+  { id: '76', nome: 'SECRETARIA DE ADMINISTRAÇÃO (SAD)', setor: 'Administrativo', categoria: 'Secretaria', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '77', nome: 'NÚCLEO DE CONFORMIDADE ADMINISTRATIVA (NUCONF)', setor: 'Administrativo', categoria: 'Conformidade', perfil_ideal: ARQUETIPOS.AUDITOR_CONFORMIDADE_RIGOROSO },
+  { id: '78', nome: 'COORDENADORIA DE LICITAÇÃO E CONTRATOS (COLICON)', setor: 'Administrativo', categoria: 'Licitações', perfil_ideal: ARQUETIPOS.GESTOR_CONTRATOS_LICITACOES },
+  { id: '79', nome: 'SEÇÃO DE LICITAÇÃO (SELIC)', setor: 'Administrativo', categoria: 'Licitação', perfil_ideal: ARQUETIPOS.GESTOR_CONTRATOS_LICITACOES },
+  { id: '80', nome: 'SEÇÃO DE CONTRATOS (SECONTR)', setor: 'Administrativo', categoria: 'Gestão de Contratos', perfil_ideal: ARQUETIPOS.GESTOR_CONTRATOS_LICITACOES },
+  { id: '81', nome: 'SEÇÃO DE COMPRAS (SECOMP)', setor: 'Administrativo', categoria: 'Compras', perfil_ideal: ARQUETIPOS.LOGISTICA_PATRIMONIAL },
+  { id: '82', nome: 'COORDENADORIA DE MATERIAL E LOGÍSTICA (COLOG)', setor: 'Administrativo', categoria: 'Logística', perfil_ideal: ARQUETIPOS.LOGISTICA_PATRIMONIAL },
+  { id: '83', nome: 'SEÇÃO DE ALMOXARIFADO (SALMOX)', setor: 'Administrativo', categoria: 'Logística', perfil_ideal: ARQUETIPOS.LOGISTICA_PATRIMONIAL },
+  { id: '84', nome: 'SEÇÃO DE PATRIMÔNIO (SEPAT)', setor: 'Administrativo', categoria: 'Patrimônio', perfil_ideal: ARQUETIPOS.LOGISTICA_PATRIMONIAL },
+  { id: '85', nome: 'DIVISÃO DE PASSAGENS E DIÁRIAS (DIPADI)', setor: 'Administrativo', categoria: 'Viagens', perfil_ideal: ARQUETIPOS.ASSISTENTE_ADMINISTRATIVO_ROTINA },
+  { id: '86', nome: 'SEÇÃO DE TRANSPORTE (SETRANS)', setor: 'Administrativo', categoria: 'Transporte', perfil_ideal: ARQUETIPOS.LOGISTICA_PATRIMONIAL },
+  { id: '87', nome: 'COORDENADORIA DE MANUTENÇÃO E PROJETOS (COMANP)', setor: 'Infraestrutura', categoria: 'Manutenção', perfil_ideal: ARQUETIPOS.ENGENHEIRO_MANUTENCAO_PREDIAL },
+  { id: '88', nome: 'NUCLEO DE ENGENHARIA, ARQUITETURA E MANUTENÇÃO DE BENS', setor: 'Infraestrutura', categoria: 'Engenharia', perfil_ideal: ARQUETIPOS.ENGENHEIRO_MANUTENCAO_PREDIAL },
+  { id: '89', nome: 'SEÇÃO DE ENGENHARIA (SEENG)', setor: 'Infraestrutura', categoria: 'Engenharia', perfil_ideal: ARQUETIPOS.ENGENHEIRO_MANUTENCAO_PREDIAL },
+  { id: '90', nome: 'SEÇÃO DE ARQUITETURA (SEARQ)', setor: 'Infraestrutura', categoria: 'Arquitetura', perfil_ideal: ARQUETIPOS.INOVADOR_TECNOLOGICO },
+  { id: '91', nome: 'SEÇÃO DE MANUTENÇÃO DE BENS (SEMANBE)', setor: 'Infraestrutura', categoria: 'Manutenção', perfil_ideal: ARQUETIPOS.ENGENHEIRO_MANUTENCAO_PREDIAL },
+  { id: '92', nome: 'SEÇÃO DE GESTÃO DOCUMENTAL (SEGDOC)', setor: 'Administrativo', categoria: 'Arquivo', perfil_ideal: ARQUETIPOS.ASSISTENTE_ADMINISTRATIVO_ROTINA },
+  { id: '93', nome: 'CHEFE DA SEARP (SEÇÃO DE ARQUIVO PERMANENTE)', setor: 'Administrativo', categoria: 'Gestão Documental', perfil_ideal: ARQUETIPOS.CURADOR_MEMORIA_BIBLIOTECA },
+  { id: '94', nome: 'SEÇÃO DE DOCUMENTAÇÃO (SEDOC)', setor: 'Administrativo', categoria: 'Documentação', perfil_ideal: ARQUETIPOS.ASSISTENTE_ADMINISTRATIVO_ROTINA },
 
-  // --- ESCOLA JUDICIAL E CULTURA ---
-  { id: 'sec_ejud', nome: 'SECRETARIA DA ESCOLA JUDICIAL', setor: 'EJUD', categoria: 'Escola Judicial e Cultura', perfil_ideal: ARQUETIPOS.COMUNICACAO_CRIATIVA, competencias: ['Gestão Educacional', 'Pedagogia'] },
-  { id: 'sec_biblioteca', nome: 'SEÇÃO DE BIBLIOTECA', setor: 'Cultura', categoria: 'Escola Judicial e Cultura', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['Biblioteconomia', 'Pesquisa'] },
-  { id: 'coord_memoria', nome: 'CENTRO DE MEMÓRIA', setor: 'Cultura', categoria: 'Escola Judicial e Cultura', perfil_ideal: ARQUETIPOS.SUPORTE_ROTINA, competencias: ['História', 'Preservação'] },
+  // --- SEGURANÇA INSTITUCIONAL ---
+  { id: '95', nome: 'COORDENADORIA DE POLÍCIA JUDICIAL (COOPJUD)', setor: 'Segurança', categoria: 'Segurança Institucional', perfil_ideal: ARQUETIPOS.GESTOR_SEGURANCA_ESTRATEGICA },
+  { id: '96', nome: 'SEÇÃO DE INTELIGÊNCIA POLICIAL (SEINP)', setor: 'Segurança', categoria: 'Inteligência', perfil_ideal: ARQUETIPOS.ANALISTA_INTELIGENCIA_SEGURANCA },
+  { id: '97', nome: 'SEÇÃO DE GESTÃO DE RISCO DE SEGURANÇA (SEGERPJ)', setor: 'Segurança', categoria: 'Riscos', perfil_ideal: ARQUETIPOS.ANALISTA_INTELIGENCIA_SEGURANCA },
+  { id: '98', nome: 'SEÇÃO DE OPERAÇÕES DE SEGURANÇA DE POLÍCIA JUDICIAL', setor: 'Segurança', categoria: 'Operações', perfil_ideal: ARQUETIPOS.AGENTE_OPERACIONAL_OSTENSIVO },
+  { id: '99', nome: 'SEÇÃO DE SEGURANÇA DE POLÍCIA JUDICIAL (SESEPJ)', setor: 'Segurança', categoria: 'Polícia Judicial', perfil_ideal: ARQUETIPOS.AGENTE_OPERACIONAL_OSTENSIVO },
+  { id: '100', nome: 'SEÇÃO DE MONITORAMENTO DE SEGURANÇA (SEMOSE)', setor: 'Segurança', categoria: 'Monitoramento', perfil_ideal: ARQUETIPOS.AGENTE_OPERACIONAL_OSTENSIVO },
+  { id: '134', nome: 'AGENTE DE SEGURANÇA - TRANSPORTE', setor: 'Administrativo', categoria: 'Transporte Executivo', perfil_ideal: ARQUETIPOS.AGENTE_OPERACIONAL_OSTENSIVO },
 
-  // --- COMUNICAÇÃO E SEGURANÇA ---
-  { id: 'div_ouvidoria', nome: 'DIVISÃO DA OUVIDORIA', setor: 'Ouvidoria', categoria: 'Apoio Institucional', perfil_ideal: ARQUETIPOS.ATENDIMENTO_EMPATICO, competencias: ['Escuta Ativa', 'Mediação'] },
-  { id: 'coord_com_social', nome: 'COORDENADORIA DE COMUNICAÇÃO SOCIAL', setor: 'Comunicação', categoria: 'Apoio Institucional', perfil_ideal: ARQUETIPOS.COMUNICACAO_CRIATIVA, competencias: ['Imprensa', 'Mídia', 'Comunicação'] },
-  { id: 'coord_policia', nome: 'COORDENADORIA DE POLÍCIA JUDICIAL', setor: 'Segurança', categoria: 'Apoio Institucional', perfil_ideal: ARQUETIPOS.SEGURANCA_VIGILANTE, competencias: ['Segurança', 'Estratégia de Segurança'] },
-  { id: 'sec_seg_pol', nome: 'SEÇÃO DE SEGURANÇA DE POLÍCIA JUDICIAL', setor: 'Segurança', categoria: 'Apoio Institucional', perfil_ideal: ARQUETIPOS.SEGURANCA_VIGILANTE, competencias: ['Segurança Patrimonial', 'Disciplina'] },
-  { id: 'sec_socioambiental', nome: 'SEÇÃO DE GESTÃO SOCIOAMBIENTAL', setor: 'Sustentabilidade', categoria: 'Apoio Institucional', perfil_ideal: ARQUETIPOS.COMUNICACAO_CRIATIVA, competencias: ['Sustentabilidade', 'Acessibilidade'] }
+  // --- TECNOLOGIA DA INFORMAÇÃO ---
+  { id: '101', nome: 'SECRETARIA DE TECNOLOGIA DA INFORMAÇÃO (SETIC)', setor: 'TIC', categoria: 'Secretaria', perfil_ideal: ARQUETIPOS.ESTRATEGISTA_INSTITUCIONAL },
+  { id: '102', nome: 'DIVISÃO DE INICIATIVAS NACIONAIS E GOVERNANÇA DE TIC', setor: 'TIC', categoria: 'Governança TI', perfil_ideal: ARQUETIPOS.CONSELHEIRO_GOVERNANCA },
+  { id: '103', nome: 'SEÇÃO DE GESTÃO DE CONTRATOS DE TIC', setor: 'TIC', categoria: 'Contratos TI', perfil_ideal: ARQUETIPOS.GESTOR_PROJETOS_TIC },
+  { id: '104', nome: 'DIRETOR DO LIODS (LABORATÓRIO DE INOVAÇÃO)', setor: 'Estratégia', categoria: 'Inovação', perfil_ideal: ARQUETIPOS.INOVADOR_TECNOLOGICO },
+  { id: '105', nome: 'DIVISÃO DE SISTEMA DE INFORMAÇÃO (DIVINF)', setor: 'TIC', categoria: 'Sistemas', perfil_ideal: ARQUETIPOS.ENGENHEIRO_SOFTWARE },
+  { id: '106', nome: 'SEÇÃO DE DESENVOLVIMENTO DE SISTEMAS (SEDES)', setor: 'TIC', categoria: 'Desenvolvimento', perfil_ideal: ARQUETIPOS.ENGENHEIRO_SOFTWARE },
+  { id: '107', nome: 'SEÇÃO DE IMPLANTAÇÃO E MANUTENÇÃO DE SISTEMAS (SEIMSIS)', setor: 'TIC', categoria: 'Sistemas', perfil_ideal: ARQUETIPOS.ENGENHEIRO_SOFTWARE },
+  { id: '108', nome: 'SEÇÃO TÉCNICA DO PJE (SETPJE)', setor: 'TIC', categoria: 'PJe', perfil_ideal: ARQUETIPOS.SUPORTE_TECNICO_EMPATICO },
+  { id: '109', nome: 'COORDENADORIA DE OPERAÇÃO E SUPORTE (COOPS)', setor: 'TIC', categoria: 'Infraestrutura', perfil_ideal: ARQUETIPOS.ARQUITETO_INFRAESTRUTURA_TI },
+  { id: '110', nome: 'DIVISÃO DE SEGURANÇA DA INFORMAÇÃO (DISEGINF)', setor: 'TIC', categoria: 'Segurança Info', perfil_ideal: ARQUETIPOS.ARQUITETO_INFRAESTRUTURA_TI },
+  { id: '111', nome: 'SEÇÃO DE ARQUITETURA E MONITORAMENTO DE SERVIÇOS', setor: 'TIC', categoria: 'Arquitetura TI', perfil_ideal: ARQUETIPOS.ARQUITETO_INFRAESTRUTURA_TI },
+  { id: '112', nome: 'SEÇÃO DE COMUNICAÇÃO DE DADOS (SECOMDA)', setor: 'TIC', categoria: 'Redes', perfil_ideal: ARQUETIPOS.ARQUITETO_INFRAESTRUTURA_TI },
+  { id: '113', nome: 'SEÇÃO DE MANUTENÇÃO DE BENS DE TIC (SEMANTIC)', setor: 'TIC', categoria: 'Manutenção TI', perfil_ideal: ARQUETIPOS.SUPORTE_TECNICO_EMPATICO },
+  { id: '114', nome: 'NÚCLEO DE ATENDIMENTO A CLIENTES DE TIC (NUATEN)', setor: 'TIC', categoria: 'Atendimento', perfil_ideal: ARQUETIPOS.SUPORTE_TECNICO_EMPATICO },
+  { id: '115', nome: 'SEÇÃO DE SUPORTE DE TIC DE 1° GRAU (SESUP1)', setor: 'TIC', categoria: 'Suporte', perfil_ideal: ARQUETIPOS.SUPORTE_TECNICO_EMPATICO },
+  { id: '116', nome: 'SEÇÃO DE SUPORTE DE TIC DE 2° GRAU (SESUP2)', setor: 'TIC', categoria: 'Suporte', perfil_ideal: ARQUETIPOS.SUPORTE_TECNICO_EMPATICO },
+  { id: '135', nome: 'GESTOR DE PROJETOS DE TIC', setor: 'TIC', categoria: 'Gestão Projetos', perfil_ideal: ARQUETIPOS.GESTOR_PROJETOS_TIC },
+  { id: '136', nome: 'ANALISTA DE SUPORTE AO PJE (2º GRAU)', setor: 'TIC', categoria: 'Suporte', perfil_ideal: ARQUETIPOS.SUPORTE_TECNICO_EMPATICO },
+
+  // --- EDUCAÇÃO E MEMÓRIA ---
+  { id: '117', nome: 'SECRETARIA DA ESCOLA JUDICIAL (SECEJUD)', setor: 'Educação', categoria: 'Escola Judicial', perfil_ideal: ARQUETIPOS.DESENVOLVEDOR_TALENTOS },
+  { id: '118', nome: 'NÚCLEO DE FORMAÇÃO E CAPACITAÇÃO DE MAGISTRADOS (NUCAM)', setor: 'Educação', categoria: 'Escola Judicial', perfil_ideal: ARQUETIPOS.DESENVOLVEDOR_TALENTOS },
+  { id: '119', nome: 'NÚCLEO DE FORMAÇÃO E CAPACITAÇÃO DE SERVIDORES (NUCAS)', setor: 'Educação', categoria: 'Capacitação', perfil_ideal: ARQUETIPOS.DESENVOLVEDOR_TALENTOS },
+  { id: '120', nome: 'SEÇÃO DE ENSINO À DISTÂNCIA (SEEAD)', setor: 'Educação', categoria: 'EAD', perfil_ideal: ARQUETIPOS.INOVADOR_TECNOLOGICO },
+  { id: '121', nome: 'COORDENADORIA DO CENTRO DE MEMÓRIA (COGEM)', setor: 'Cultura', categoria: 'Memória', perfil_ideal: ARQUETIPOS.CURADOR_MEMORIA_BIBLIOTECA },
+  { id: '122', nome: 'SEÇÃO DE BIBLIOTECA (SEBIB)', setor: 'Cultura', categoria: 'Biblioteca', perfil_ideal: ARQUETIPOS.CURADOR_MEMORIA_BIBLIOTECA },
+
+  // --- COMUNICAÇÃO ---
+  { id: '123', nome: 'COORDENADORIA DE COMUNICAÇÃO SOCIAL (COORDCOM)', setor: 'Comunicação', categoria: 'Comunicação', perfil_ideal: ARQUETIPOS.COMUNICADOR_INSTITUCIONAL },
+  { id: '124', nome: 'CHEFE DA SEMARK (SEÇÃO DE MARKETING E PUBLICIDADE)', setor: 'Comunicação', categoria: 'Marketing', perfil_ideal: ARQUETIPOS.COMUNICADOR_INSTITUCIONAL },
+  { id: '125', nome: 'SEÇÃO DE DIVULGAÇÃO E COMUNICAÇÃO (SEDIV)', setor: 'Comunicação', categoria: 'Comunicação', perfil_ideal: ARQUETIPOS.COMUNICADOR_INSTITUCIONAL },
+  { id: '126', nome: 'SEÇÃO DE IMPRENSA E RELAÇÕES PÚBLICAS (SEIRP)', setor: 'Comunicação', categoria: 'Imprensa', perfil_ideal: ARQUETIPOS.COMUNICADOR_INSTITUCIONAL },
+  { id: '127', nome: 'COORDENADORIA DE CERIMONIAL (COCEV)', setor: 'Comunicação', categoria: 'Cerimonial', perfil_ideal: ARQUETIPOS.CERIMONIALISTA_PROTOCOLAR },
+  { id: '128', nome: 'DIVISÃO DA OUVIDORIA (DIVIOUV)', setor: 'Comunicação', categoria: 'Ouvidoria', perfil_ideal: ARQUETIPOS.COMUNICADOR_INSTITUCIONAL }
 ];
 
-// Helper para agrupar as unidades
-const unidadesAgrupadas = unidadesTRT11.reduce((acc, unit) => {
-  if (!acc[unit.categoria]) acc[unit.categoria] = [];
-  acc[unit.categoria].push(unit);
-  return acc;
-}, {});
+// --- RENDERIZADOR DE MARKDOWN LIMPO E ROBUSTO ---
+const RobustMarkdown = ({ text }) => {
+  if (!text) return null;
+
+  // Função auxiliar para renderizar negrito e itálico inline
+  const renderInline = (str) => {
+    // Primeiro separa por negrito **texto**
+    const parts = str.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="font-bold text-purple-900">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
+
+  return (
+    <div className="space-y-3 text-slate-700 leading-relaxed font-sans text-sm">
+      {text.split('\n').map((line, index) => {
+        const cleanLine = line.trim();
+        if (!cleanLine) return null;
+
+        // Linha Horizontal (---)
+        if (cleanLine.match(/^---+$/)) {
+           return <hr key={index} className="border-t border-purple-100 my-4" />;
+        }
+
+        // Títulos (###)
+        if (cleanLine.startsWith('###')) {
+          return (
+            <h3 key={index} className="text-lg font-bold text-purple-900 mt-6 mb-2 flex items-center gap-2">
+              {cleanLine.replace(/^#+\s*/, '').replace(/\*\*/g, '')}
+            </h3>
+          );
+        }
+        
+        // Listas (* ou -)
+        if (cleanLine.match(/^[\*\-]\s/)) {
+           return (
+            <div key={index} className="flex gap-3 ml-2 mb-1">
+              <span className="text-purple-500 font-bold mt-1.5 w-1.5 h-1.5 bg-purple-500 rounded-full flex-shrink-0 block"></span>
+              <div className="flex-1 text-slate-700">
+                {renderInline(cleanLine.replace(/^[\*\-]\s/, ''))}
+              </div>
+            </div>
+           );
+        }
+        
+        // Citações (>)
+        if (cleanLine.startsWith('>')) {
+             return (
+                 <blockquote key={index} className="border-l-4 border-purple-300 pl-4 py-1 my-2 italic text-slate-600 bg-purple-50 rounded-r">
+                     {renderInline(cleanLine.replace(/^>\s*/, ''))}
+                 </blockquote>
+             );
+        }
+
+        // Parágrafos Normais
+        return <p key={index} className="mb-2 text-justify">{renderInline(cleanLine)}</p>;
+      })}
+    </div>
+  );
+};
+
+// --- COMPONENTE DE LOADING SKELETON ---
+const PDILoadingSkeleton = () => (
+  <div className="border-t border-slate-200 bg-purple-50 p-8 animate-pulse rounded-b-xl">
+    <div className="flex items-center gap-3 mb-6">
+      <div className="bg-purple-200 p-2 rounded-lg w-10 h-10"></div>
+      <div className="space-y-2">
+        <div className="h-4 bg-purple-200 rounded w-48"></div>
+        <div className="h-3 bg-purple-200 rounded w-32"></div>
+      </div>
+    </div>
+    <div className="space-y-4 bg-white p-8 rounded-xl border border-purple-100">
+      <div className="h-4 bg-slate-100 rounded w-3/4"></div>
+      <div className="h-4 bg-slate-100 rounded w-full"></div>
+      <div className="h-4 bg-slate-100 rounded w-5/6"></div>
+      <div className="h-8 bg-slate-100 rounded w-1/3 mt-6 mb-4"></div>
+      <div className="space-y-2">
+        <div className="flex gap-3">
+          <div className="w-2 h-2 rounded-full bg-slate-200 mt-2"></div>
+          <div className="h-3 bg-slate-100 rounded w-full"></div>
+        </div>
+        <div className="flex gap-3">
+          <div className="w-2 h-2 rounded-full bg-slate-200 mt-2"></div>
+          <div className="h-3 bg-slate-100 rounded w-5/6"></div>
+        </div>
+      </div>
+    </div>
+    <div className="mt-4 text-center text-xs text-purple-400 font-medium">
+      <span className="animate-bounce">●</span>
+      <span className="animate-bounce delay-100 mx-1">●</span>
+      <span className="animate-bounce delay-200">●</span>
+      <span className="ml-2">Gerando estratégias personalizadas com IA...</span>
+    </div>
+  </div>
+);
 
 export default function PeopleAnalyticsTRT11() {
   const [step, setStep] = useState(0); 
-  const [testPhase, setTestPhase] = useState(1); // 1 = Positive Selection, 2 = Negative Selection
-  const [answers, setAnswers] = useState({}); // { [id]: 5 or 1 }
+  const [testPhase, setTestPhase] = useState(1);
+  const [answers, setAnswers] = useState({});
   const [userProfile, setUserProfile] = useState(null);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [previewUnit, setPreviewUnit] = useState(null);
   const [matchResult, setMatchResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  
+  const [pdiResult, setPdiResult] = useState(null);
+  const [pdiLoading, setPdiLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
   
   const fileInputRef = useRef(null);
-  const apiKey = ""; // API Key Environment Variable
+  const searchRef = useRef(null);
+  const apiKey = ""; 
   const [draggedAdj, setDraggedAdj] = useState(null);
 
-  // --- LÓGICA DE UPLOAD (GEMINI) ---
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setLoading(true);
-      setErrorMsg('');
+  // Injetar scripts de PDF
+  useEffect(() => {
+    const script1 = document.createElement('script');
+    script1.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+    script1.async = true;
+    document.body.appendChild(script1);
 
-      if (file.type === 'application/pdf') {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const base64Data = e.target.result.split(',')[1];
-          analyzeWithGemini({ inlineData: { mimeType: 'application/pdf', data: base64Data } }, file.name);
-        };
-        reader.onerror = () => { setLoading(false); setErrorMsg('Erro ao ler o arquivo PDF.'); };
-        reader.readAsDataURL(file);
-      } else {
-        setLoading(false);
-        setErrorMsg('Por favor, envie um arquivo PDF válido.');
+    const script2 = document.createElement('script');
+    script2.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+    script2.async = true;
+    document.body.appendChild(script2);
+
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowDropdown(false);
       }
     }
-  };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      if(document.body.contains(script1)) document.body.removeChild(script1);
+      if(document.body.contains(script2)) document.body.removeChild(script2);
+    };
+  }, []);
 
-  const analyzeWithGemini = async (contentPart, fileName) => {
-    const systemInstruction = `
-      Atue como um especialista em psicometria. Analise o documento PDF fornecido e extraia os percentuais (0-100) dos 5 grandes fatores (Big Five).
-      Retorne APENAS um objeto JSON válido: { "abertura": number, "conscienciosidade": number, "extroversao": number, "amabilidade": number, "estabilidade": number }
-    `;
-
-    try {
-      const payload = {
-        contents: [{ parts: Array.isArray(contentPart) ? contentPart : [contentPart] }],
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        generationConfig: { responseMimeType: "application/json" }
-      };
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
-
-      const data = await response.json();
-      const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === "application/pdf") {
+      setLoading(true);
+      setErrorMsg('');
       
-      if (!jsonText) throw new Error("A IA não retornou dados válidos.");
-
-      const extractedProfile = JSON.parse(jsonText);
-      setUserProfile(extractedProfile);
-      setStep(2); 
-    } catch (error) {
-      console.error(error);
-      setErrorMsg('Não foi possível interpretar o relatório PDF.');
-    } finally {
-      setLoading(false);
+      // Simulação de processamento de PDF
+      setTimeout(() => {
+        setLoading(false);
+        const simulatedProfile = {
+           abertura: Math.floor(Math.random() * (90 - 60) + 60),
+           conscienciosidade: Math.floor(Math.random() * (95 - 70) + 70),
+           extroversao: Math.floor(Math.random() * (85 - 40) + 40),
+           amabilidade: Math.floor(Math.random() * (90 - 60) + 60),
+           estabilidade: Math.floor(Math.random() * (90 - 50) + 50)
+        };
+        setUserProfile(simulatedProfile);
+        setStep(2); 
+        alert("Perfil extraído com sucesso do PDF (Simulação). Prossiga para a análise de aderência.");
+      }, 2000);
+    } else {
+      setErrorMsg("Por favor, selecione um arquivo PDF válido.");
     }
   };
 
-  // --- LÓGICA DO TESTE SEQUENCIAL (2 FASES) ---
-  
+  // --- Função auxiliar para converter Markdown em HTML para o PDF ---
+  const formatPDIForPDF = (rawText) => {
+    if (!rawText) return '';
+    
+    let html = rawText
+        // Sanitização básica
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        
+        // Headers (### Title)
+        .replace(/^### (.*$)/gim, '<h4 style="color: #4338ca; margin-top: 15px; margin-bottom: 8px; font-size: 14px; font-weight: bold;">$1</h4>')
+        .replace(/^## (.*$)/gim, '<h3 style="color: #312e81; margin-top: 20px; margin-bottom: 10px; font-size: 16px; font-weight: bold;">$1</h3>')
+        
+        // Linha Horizontal (---)
+        .replace(/^---+$/gim, '<hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 15px 0;" />')
+        
+        // Listas (* Item ou - Item)
+        .replace(/^[\*\-] (.*$)/gim, '<div style="margin-bottom: 4px; padding-left: 10px;">• <span style="margin-left: 5px;">$1</span></div>')
+        
+        // Citações (> Text) - nota: > foi escapado para &gt;
+        .replace(/^&gt; (.*$)/gim, '<div style="border-left: 3px solid #c7d2fe; padding-left: 10px; margin: 10px 0; color: #555; font-style: italic;">$1</div>')
+        
+        // Negrito (**Text**)
+        .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+        
+        // Quebras de linha
+        .replace(/\n/g, '<br />');
+
+    return html;
+  };
+
+  const generatePDF = async () => {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        alert("Biblioteca PDF ainda carregando. Tente novamente em alguns segundos.");
+        return;
+    }
+    setPdfLoading(true);
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        
+        const content = document.createElement('div');
+        content.style.width = '190mm';
+        content.style.padding = '20px';
+        content.style.fontFamily = 'Helvetica, Arial, sans-serif';
+        content.style.fontSize = '12px';
+        content.style.color = '#333';
+        
+        // Formata o PDI usando a nova função robusta
+        const formattedPDI = formatPDIForPDF(pdiResult);
+        
+        content.innerHTML = `
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h1 style="color: #312e81; font-size: 24px; margin: 0;">Relatório de Fit Comportamental</h1>
+                <p style="color: #6b7280; margin: 5px 0;">TRT11 People Analytics</p>
+            </div>
+            
+            <div style="margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                <p style="margin: 5px 0;"><strong>Candidato para:</strong> ${selectedUnit.nome}</p>
+                <p style="margin: 5px 0;"><strong>Categoria:</strong> ${selectedUnit.categoria}</p>
+                <p style="margin: 5px 0;"><strong>Índice de Aderência:</strong> <span style="font-size: 16px; font-weight: bold; color: ${matchResult.score >= 75 ? '#16a34a' : '#ca8a04'}">${matchResult.score}%</span></p>
+            </div>
+
+            <h3 style="color: #312e81; margin-top: 20px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Análise de Gaps</h3>
+            ${matchResult.details.map(d => `
+                <div style="margin-bottom: 8px; color: #374151;">
+                    <strong>${d.trait.toUpperCase()}:</strong> ${d.text}
+                </div>
+            `).join('')}
+
+            ${pdiResult ? `
+                <div style="page-break-before: always;"></div>
+                <h3 style="color: #312e81; margin-top: 30px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Plano de Desenvolvimento Individual (PDI)</h3>
+                <div style="color: #374151; line-height: 1.6;">
+                    ${formattedPDI}
+                </div>
+            ` : ''}
+            
+            <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #9ca3af; border-top: 1px solid #eee; padding-top: 10px;">
+                Gerado automaticamente por TRT11 People Analytics AI
+            </div>
+        `;
+
+        document.body.appendChild(content);
+
+        await doc.html(content, {
+            callback: function (doc) {
+                doc.save(`Relatorio_Fit_${selectedUnit.id}.pdf`);
+                document.body.removeChild(content);
+                setPdfLoading(false);
+            },
+            x: 10,
+            y: 10,
+            width: 190,
+            windowWidth: 900
+        });
+    } catch (e) {
+        console.error(e);
+        alert("Erro ao gerar PDF.");
+        setPdfLoading(false);
+    }
+  };
+
+  const filteredUnits = postosTrabalho.filter(unit => 
+    unit.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    unit.setor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    unit.categoria.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredUnidadesAgrupadas = filteredUnits.reduce((acc, unit) => {
+    if (!acc[unit.categoria]) acc[unit.categoria] = [];
+    acc[unit.categoria].push(unit);
+    return acc;
+  }, {});
+
   const handleToggle = (id, value) => {
     setAnswers(prev => {
       const next = { ...prev };
       if (next[id] === value) {
-        delete next[id]; // Toggle off
+        delete next[id]; 
       } else {
-        next[id] = value; // Set value
+        next[id] = value; 
       }
       return next;
     });
@@ -385,35 +663,6 @@ export default function PeopleAnalyticsTRT11() {
     }
   };
   
-  // DRAG AND DROP LOGIC
-  const onDragStart = (e, adjId) => {
-    setDraggedAdj(adjId);
-    e.dataTransfer.effectAllowed = "move";
-  };
-
-  const onDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const onDrop = (e, targetVal) => {
-    e.preventDefault();
-    if (draggedAdj !== null) {
-      // If dropping into "Selected" zone (value 5 or 1)
-      if (targetVal !== 0) {
-        handleToggle(draggedAdj, targetVal);
-      } else {
-        // Dropping back to "Available" (remove from answers)
-        setAnswers(prev => {
-          const next = { ...prev };
-          delete next[draggedAdj];
-          return next;
-        });
-      }
-      setDraggedAdj(null);
-    }
-  };
-
-  // --- CÁLCULO CIENTÍFICO (ADJECTIVE MARKERS) ---
   const calculateResults = () => {
     setLoading(true);
     setTimeout(() => {
@@ -422,11 +671,8 @@ export default function PeopleAnalyticsTRT11() {
 
       BIG_FIVE_ADJECTIVES.forEach(adj => {
         let val = answers[adj.id];
-        if (val === undefined) val = 3; // Neutro se não marcado
-        
-        // Inversão de chave
+        if (val === undefined) val = 3; 
         const adjustedVal = adj.key === 1 ? val : (6 - val);
-        
         scores[adj.trait] += adjustedVal;
         counts[adj.trait] += 1;
       });
@@ -435,7 +681,6 @@ export default function PeopleAnalyticsTRT11() {
       Object.keys(scores).forEach(trait => {
         if (counts[trait] > 0) {
           const avg = scores[trait] / counts[trait];
-          // Normalização: (Média - 1) / 4 * 100
           finalProfile[trait] = Math.round(((avg - 1) / 4) * 100);
         } else {
           finalProfile[trait] = 0;
@@ -448,7 +693,6 @@ export default function PeopleAnalyticsTRT11() {
     }, 1500);
   };
 
-  // --- LÓGICA DE MATCH ---
   const calculateMatch = (unit) => {
     if (!unit || !userProfile) return;
     setLoading(true);
@@ -481,46 +725,100 @@ export default function PeopleAnalyticsTRT11() {
     }, 1000);
   };
 
+  const generatePDI = async () => {
+    setPdiLoading(true);
+    const prompt = `
+      Atue como um **Psicólogo Organizacional Sênior e Coach Executivo**.
+      
+      Crie um **Plano de Desenvolvimento Individual (PDI)** de alto impacto para um servidor do Tribunal Regional do Trabalho (TRT11).
+      
+      **CONTEXTO:**
+      - **Posto:** ${selectedUnit.nome}
+      - **Categoria:** ${selectedUnit.categoria}
+      
+      **PERFIL (Ideal vs Real):**
+      - Ideal: ${JSON.stringify(selectedUnit.perfil_ideal)}
+      - Real: ${JSON.stringify(userProfile)}
+      
+      **GAPS:**
+      ${JSON.stringify(matchResult.details)}
+      
+      ---
+      
+      **ESTRUTURA DE SAÍDA (MARKDOWN LIMPO):**
+      
+      ### 1. Diagnóstico Executivo 🧠
+      Análise breve e empática.
+      
+      ### 2. Plano de Ação: Domínio Comportamental 🚀
+      Para cada gap, use uma lista com marcadores:
+      * **Traço:** [Nome]
+      * **Desafio:** Impacto prático.
+      * **Estratégia Micro:** Ação imediata.
+      * **Estratégia Macro:** Mudança de hábito.
+      
+      ### 3. Curadoria de Conhecimento 📚
+      Sugestões de livros/artigos.
+      
+      ### 4. Compromisso 🎯
+      Frase motivadora final.
+      
+      **REGRAS DE FORMATAÇÃO RIGOROSAS:**
+      - Use APENAS a sintaxe Markdown padrão.
+      - NÃO use tabelas complexas (evite o uso de barras verticais | para formatação).
+      - Para listas, use * ou - seguido de espaço.
+      - Use **negrito** para destaque, evite outros caracteres especiais.
+    `;
+
+    try {
+      const payload = {
+        contents: [{ parts: [{ text: prompt }] }]
+      };
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
+
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!text) throw new Error("A IA não retornou um plano válido.");
+
+      setPdiResult(text);
+    } catch (error) {
+      console.error(error);
+      setPdiResult("Não foi possível gerar o PDI no momento. Por favor, tente novamente.");
+    } finally {
+      setPdiLoading(false);
+    }
+  };
+
   const handleRestart = () => {
     setStep(0);
     setTestPhase(1);
     setAnswers({});
     setUserProfile(null);
     setSelectedUnit(null);
+    setPreviewUnit(null);
     setMatchResult(null);
     setErrorMsg('');
+    setSearchTerm('');
+    setPdiResult(null);
   };
 
-  const handlePrint = () => {
-    setTimeout(() => { window.print(); }, 100);
-  };
-
-  // --- FILTRAGEM DE ITENS ---
   const itemsToDisplay = testPhase === 1 
     ? BIG_FIVE_ADJECTIVES 
-    : BIG_FIVE_ADJECTIVES.filter(adj => !answers[adj.id]);
-
-  const selectedItems = testPhase === 1
-    ? BIG_FIVE_ADJECTIVES.filter(adj => answers[adj.id] === 5)
-    : BIG_FIVE_ADJECTIVES.filter(adj => answers[adj.id] === 1);
+    : BIG_FIVE_ADJECTIVES.filter(adj => answers[adj.id] !== 5);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
-      <style>{`
-        @media print {
-          @page { margin: 0.5cm; size: A4 portrait; }
-          body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; background: white !important; color: black !important; }
-          header, footer, .no-print, button { display: none !important; }
-          main { padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
-          .bg-slate-50 { background-color: #f8fafc !important; border: 1px solid #eee; }
-          .text-white { color: black !important; } 
-          .print\\:block { display: block !important; }
-          .print\\:hidden { display: none !important; }
-          .break-inside-avoid { break-inside: avoid; }
-          .shadow-xl, .shadow-lg, .shadow-sm { box-shadow: none !important; border: 1px solid #ddd; }
-        }
-      `}</style>
-
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 text-white p-4 shadow-lg sticky top-0 z-50 no-print">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -533,7 +831,7 @@ export default function PeopleAnalyticsTRT11() {
           </div>
           <div className="flex items-center gap-2 text-xs font-mono bg-white/10 px-3 py-1 rounded border border-white/20">
             <BrainCircuit className="w-3 h-3 text-yellow-300" />
-            <span>AI Powered v2.7</span>
+            <span>AI Powered v3.4</span>
           </div>
         </div>
       </header>
@@ -762,49 +1060,104 @@ export default function PeopleAnalyticsTRT11() {
               <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 h-full">
                 <h2 className="text-xl font-bold mb-2 flex items-center gap-2 text-slate-800">
                   <Briefcase className="w-5 h-5 text-indigo-600" />
-                  Seleção de Unidade para Fit
+                  Seleção de Posto de Trabalho para Fit
                 </h2>
                 <p className="text-slate-500 mb-8 text-sm">
-                  Selecione uma das {unidadesTRT11.length} unidades do tribunal para comparar seu perfil com o arquétipo ideal.
+                  Busque pelo nome da unidade, setor ou atividade (ex: "conciliação", "segurança", "manutenção").
                 </p>
 
-                <div className="space-y-8">
+                <div className="space-y-8" ref={searchRef}>
                   <div className="relative">
-                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Unidade de Destino</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase mb-2">Buscar Posto de Trabalho</label>
+                    
+                    {/* AUTOCOMPLETE INPUT */}
                     <div className="relative">
-                      <select
-                        className="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-900 rounded-lg p-4 pr-10 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block shadow-sm text-sm"
-                        onChange={(e) => {
-                          const unit = unidadesTRT11.find(u => u.id === e.target.value);
-                          setPreviewUnit(unit);
-                        }}
-                        value={previewUnit?.id || ""}
-                      >
-                        <option value="">Selecione na lista...</option>
-                        {Object.keys(unidadesAgrupadas).map((categoria) => (
-                          <optgroup key={categoria} label={categoria} className="font-bold text-indigo-900">
-                            {unidadesAgrupadas[categoria].map((unit) => (
-                              <option key={unit.id} value={unit.id} className="text-slate-700">
-                                {unit.nome}
-                              </option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-                        <ChevronDown className="w-5 h-5" />
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Search className="h-5 w-5 text-indigo-400" />
                       </div>
+                      <input
+                        type="text"
+                        className="block w-full pl-11 pr-10 py-4 border border-slate-200 rounded-xl leading-5 bg-slate-50 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm font-medium shadow-sm"
+                        placeholder="Digite o nome, setor ou uma atividade (ex: 'folha de pagamento')..."
+                        value={searchTerm}
+                        onFocus={() => setShowDropdown(true)}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setShowDropdown(true);
+                          if (e.target.value === '') setPreviewUnit(null);
+                        }}
+                      />
+                      {searchTerm && (
+                        <button 
+                          onClick={() => {
+                            setSearchTerm('');
+                            setPreviewUnit(null);
+                            setShowDropdown(true);
+                          }}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
+
+                    {/* DROPDOWN FLUTUANTE DE RESULTADOS */}
+                    {showDropdown && (
+                      <div className="absolute z-30 w-full mt-2 bg-white rounded-xl shadow-2xl border border-indigo-100 max-h-80 overflow-y-auto custom-scrollbar animate-fade-in-up">
+                        {Object.keys(filteredUnidadesAgrupadas).length > 0 ? (
+                          Object.keys(filteredUnidadesAgrupadas).map((categoria) => (
+                            <div key={categoria}>
+                              <div className="bg-slate-50/80 backdrop-blur-sm px-4 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider sticky top-0 border-b border-slate-100">
+                                {categoria}
+                              </div>
+                              {filteredUnidadesAgrupadas[categoria].map((unit) => (
+                                <button
+                                  key={unit.id}
+                                  onClick={() => {
+                                    setPreviewUnit(unit);
+                                    setSearchTerm(unit.nome);
+                                    setShowDropdown(false);
+                                  }}
+                                  className={`w-full text-left px-5 py-3 transition-colors border-b border-slate-50 last:border-0 flex items-center justify-between group
+                                    ${previewUnit?.id === unit.id ? 'bg-indigo-50' : 'hover:bg-indigo-50/50'}
+                                  `}
+                                >
+                                  <div>
+                                    <div className={`font-bold text-sm ${previewUnit?.id === unit.id ? 'text-indigo-700' : 'text-slate-700 group-hover:text-indigo-700'}`}>
+                                      {unit.nome}
+                                    </div>
+                                    <div className="text-xs text-slate-400 mt-1 line-clamp-1 opacity-70">
+                                      {unit.atividades}
+                                    </div>
+                                  </div>
+                                  {previewUnit?.id === unit.id && <CheckCircle className="w-5 h-5 text-indigo-600 shrink-0 ml-2" />}
+                                </button>
+                              ))}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="p-8 text-center text-slate-400">
+                            <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                            <p className="font-medium">Nenhum posto encontrado</p>
+                            <p className="text-xs mt-1 opacity-70">Tente buscar por atividade, ex: "atendimento".</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {previewUnit ? (
                     <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-6 animate-fade-in">
                       <div className="mb-6 pb-6 border-b border-indigo-200/50">
-                        <span className="text-[10px] font-bold bg-indigo-200 text-indigo-800 px-2 py-1 rounded uppercase tracking-wide mb-2 inline-block">
-                          {previewUnit.categoria}
-                        </span>
+                        <div className="flex items-center gap-2 mb-2">
+                           <span className="text-[10px] font-bold bg-indigo-200 text-indigo-800 px-2 py-1 rounded uppercase tracking-wide">
+                             {previewUnit.categoria}
+                           </span>
+                           <span className="text-[10px] font-bold bg-white border border-indigo-100 text-slate-500 px-2 py-1 rounded uppercase tracking-wide">
+                             {previewUnit.setor}
+                           </span>
+                        </div>
                         <h3 className="text-xl font-bold text-indigo-900">{previewUnit.nome}</h3>
-                        <p className="text-indigo-600 text-sm mt-1">{previewUnit.setor}</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -826,13 +1179,9 @@ export default function PeopleAnalyticsTRT11() {
                            </div>
                         </div>
                         <div>
-                          <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Competências Exigidas</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {previewUnit.competencias.map(c => (
-                              <span key={c} className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-600 shadow-sm">
-                                {c}
-                              </span>
-                            ))}
+                          <h4 className="text-xs font-bold text-slate-400 uppercase mb-3">Atividades Típicas (Inferidas)</h4>
+                          <div className="bg-white p-4 rounded-lg border border-slate-200 text-sm text-slate-600 leading-relaxed shadow-sm">
+                            Este perfil ideal foi calculado com base nas atividades padrão para {previewUnit.categoria} e {previewUnit.setor}.
                           </div>
                         </div>
                       </div>
@@ -857,9 +1206,9 @@ export default function PeopleAnalyticsTRT11() {
                   ) : (
                     <div className="border-2 border-dashed border-slate-200 rounded-xl p-12 text-center bg-slate-50/50">
                       <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-slate-100">
-                        <Search className="w-8 h-8 text-slate-300" />
+                        <Target className="w-8 h-8 text-slate-300" />
                       </div>
-                      <p className="text-slate-400 text-sm font-medium">Selecione uma unidade acima para visualizar os detalhes.</p>
+                      <p className="text-slate-400 text-sm font-medium">Use a busca acima para encontrar um posto de trabalho.</p>
                     </div>
                   )}
                 </div>
@@ -871,6 +1220,7 @@ export default function PeopleAnalyticsTRT11() {
         {/* STEP 3: RESULTS */}
         {step === 3 && selectedUnit && matchResult && (
           <div className="space-y-6 animate-fade-in-up">
+            {/* Top Action Bar - Back and New Analysis */}
             <div className="flex items-center justify-between mb-2 no-print">
               <div className="flex gap-2">
                 <button 
@@ -886,12 +1236,18 @@ export default function PeopleAnalyticsTRT11() {
                   <RotateCcw className="w-4 h-4" /> Nova Análise
                 </button>
               </div>
-
+              
+              {/* Top Generate PDI Button */}
               <button 
-                onClick={handlePrint}
-                className="text-sm bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md font-bold"
+                onClick={generatePDI}
+                disabled={pdiLoading || pdiResult}
+                className={`
+                  text-sm text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md font-bold
+                  ${pdiLoading || pdiResult ? 'bg-purple-400 cursor-not-allowed hidden' : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'}
+                `}
               >
-                <Download className="w-4 h-4" /> Imprimir / Salvar PDF
+                {pdiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                {pdiLoading ? 'Gerando PDI...' : 'Gerar PDI com IA'}
               </button>
             </div>
 
@@ -1030,7 +1386,43 @@ export default function PeopleAnalyticsTRT11() {
                   </div>
                 </div>
               </div>
+
+              {/* LOADING SKELETON */}
+              {pdiLoading && <PDILoadingSkeleton />}
+
+              {/* PDI AI SECTION */}
+              {pdiResult && !pdiLoading && (
+                <div className="border-t border-slate-200 bg-purple-50 p-8 animate-fade-in break-inside-avoid print:bg-white print:border-t-2 print:border-black">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-purple-600 p-2 rounded-lg text-white print:text-black print:bg-transparent print:border print:border-black">
+                      <Lightbulb className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-purple-900 print:text-black">Plano de Desenvolvimento Individual (PDI)</h3>
+                      <p className="text-sm text-purple-700 print:text-gray-600">Gerado por IA (Gemini) • Estratégias de Domínio Comportamental</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-8 rounded-xl border border-purple-100 shadow-sm print:border-0 print:shadow-none print:p-0">
+                    <RobustMarkdown text={pdiResult} />
+                  </div>
+                </div>
+              )}
+
             </div>
+
+            {/* Bottom Actions - PDF Button */}
+            <div className="mt-8 flex justify-center pb-12 no-print">
+              <button 
+                onClick={generatePDF}
+                className="bg-indigo-900 text-white hover:bg-indigo-800 px-8 py-4 rounded-xl flex items-center gap-3 transition-all shadow-xl font-bold text-lg hover:scale-105 transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={pdfLoading}
+              >
+                {pdfLoading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Printer className="w-6 h-6" />}
+                {pdfLoading ? 'Gerando PDF...' : 'Baixar Relatório Completo (PDF)'}
+              </button>
+            </div>
+
           </div>
         )}
       </main>
